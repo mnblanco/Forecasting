@@ -1,0 +1,160 @@
+---
+title: "ETC3580: Advanced Statistical Modelling"
+author: "Week 11: Additive models"
+fontsize: 14pt
+output:
+  beamer_presentation:
+    theme: metropolis
+    fig_height: 5
+    fig_width: 7
+    highlight: tango
+    includes:
+      in_header: header.tex
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, cache=TRUE, warning=FALSE, message=FALSE,
+  dev.args=list(bg=grey(0.9), pointsize=11))
+library(faraway)
+library(tidyverse)
+library(mgcv)
+```
+
+
+# Additive models
+
+## Additive models
+
+Avoid curse of dimensionality by assuming additive surface:\vspace*{-0.2cm}
+$$y = \beta_0 + \sum_{j=1}^p f_j(x_j) + \varepsilon$$
+where $\varepsilon \sim N(0,\sigma^2)$.
+
+ * Restricts complexity but a much richer class of surfaces than parametric models.
+ * Need to estimate $p$ one-dimensional functions instead of one $p$-dimensional function.
+ * Usually set each $f_j$ to have zero mean.
+ * Some $f_j$ may be linear.
+
+## Additive models
+
+ * Up to $p$ different bandwidths to select.
+ * Generalization of multiple regression model
+  $$ y = \beta_0 + \sum_{j=1}^p \beta_j x_j + \varepsilon$$
+which is also additive in its predictors.
+ * Estimated functions, $f_j$, are analogues of coefficients in linear regression.
+ * Interpretation easy with additive structure.
+
+## Additive models
+
+ * Categorical predictors: fit constant for each level as for linear models.
+ * Allow interaction between two continuous variables $x_j$ and $x_k$ by fitting a bivariate surface $f_{j,k}(x_j,x_k)$.
+ * Allow interaction betwen factor $x_j$ and continuous $x_k$ by fitting separate functions $f_{j,k}(x_k)$ for each level of $x_j$.
+
+## Additive models in R
+
+ * `gam` package: more smoothing approaches, uses a backfitting algorithm for estimation.
+ * `mgcv` package: simplest approach, with automated smoothing selection and wider functionality.
+ * `gss` package: smoothing splines only
+
+## Estimation
+
+\begin{block}{Back-fitting-algorithm (Hastie and Tibshirani, 1990)}
+\begin{enumerate}
+ \item Set $\beta_0 = \bar{y}$.
+ \item Set $f_j(x) = \hat\beta_j x$ where $\hat\beta_j$ is OLS estimate.
+ \item For $j=1,\dots,p,1,\dots,p,1,\dots,p,\dots$
+     $$f_j(x) = S(x_j, y - \beta_0 - \sum_{i\ne j}f_i(x_i))$$
+    where $S(x,u)$ means univariate smooth of $u$ on $x$.
+\end{enumerate}
+Iterate step 3 until convergence.\pause
+\end{block}
+
+ * $S$ could be *any* univariate smoother.
+ * $y - \beta_0 - \sum\limits_{i\ne j}f_i(x_i)$ is a "partial residual"
+
+## Estimation
+
+\begin{block}{Regression splines}
+No need for iterative back-fitting as the model can be written as a linear model.
+\end{block}
+
+\begin{block}{Penalized regression splines}
+No need for iterative back-fitting as the model can be written as a linear mixed-effects model.
+\end{block}
+
+
+
+## Inference for Additive Models
+
+Each fitted function can be written as a linear smoother \colorbox[rgb]{1,1,.5}{$\hat{\bm f}_j
+= \bm{S}_j\bm y$} for some $n\times n$ matrix $\bm{S}_j$.
+
+$\hat{\bm f}(\bm x)$ is a linear smoother.  Denote smoothing matrix as $\bm S$:
+$$\hat{\bm f}(\bm x) = \bm S \bm y = \beta_0{\bf 1} + \sum_{j=1}^p\bm{S}_j\bm y$$
+where ${\bf 1} = [1,1,\dots,1]^T$.
+Then
+$\bm S = \sum_{j=0}^p \bm{S}_j$
+where $\bm S_0$ is such that $\bm S_0\bm y = \beta_0{\bf 1}$.
+
+Thus all inference results for linear smoothers may be applied to
+additive model.
+
+
+# Generalized additive models
+
+## Generalised additive models
+
+\begin{block}{Generalized Linear Model (GLM)}
+\begin{itemize}
+\item Distribution of $y$
+\item Link function $g$
+\item $\E(y\mid x_1,\dots,x_p)=\mu$ where $g(\mu)=\beta_0 + \sum\limits_{j=1}^p \beta_j x_j$.
+\end{itemize}
+\end{block}\pause
+
+\begin{alertblock}{Generalised Additive Model (GAM)}
+\begin{itemize}
+\item Distribution of $y$
+\item Link function $g$
+\item $\E(y\mid x_1,\dots,x_p)=\mu$ where
+$g(\mu) = \beta_0 + \sum\limits_{j=1}^p f_j(x_j)$.
+\end{itemize}
+\end{alertblock}
+
+
+## Generalised additive models
+
+\alert{Examples:}
+
+ * $Y$ binary and $g(\mu) = \log[\mu(1-\mu)]$.  This is a logistic
+additive model.
+ * $Y$ normal and $g(\mu) = \mu$.  This is a standard additive model.
+
+
+\alert{Estimation}
+
+Hastie and Tibshirani describe method for fitting GAMs using a
+method known as ``local scoring'' which is an extension of the
+Fisher scoring procedure.
+
+## Next week
+
+\LARGE
+
+* Revision lecture on Monday
+
+* No lecture on Tuesday
+
+
+## Lynxx Consulting Seminar
+
+### Real world projects: Business analytics with imperfect data
+
+**Presenter:**  Matt McInnes,
+
+Managing Director - Asia Pacific,  Lynxx Consulting
+
+\vspace*{.6cm}
+
+Thursday, 18 October 2018, 5:00pm to 6:30pm
+
+**Location:**  Learning and Teaching Building, Room G58
