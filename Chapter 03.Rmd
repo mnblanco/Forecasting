@@ -19,7 +19,7 @@ options(width=45)
 beer2 <- window(ausbeer, start=1992)
 autoplot(beer2) +
   xlab("Year") + ylab("megalitres") +
-    ggtitle("Australian quarterly beer production")
+  ggtitle("Australian quarterly beer production")
 ```
 
 How would you forecast these data?
@@ -47,31 +47,30 @@ How would you forecast these data?
 
 ### Average method
 
-  * Forecast of all future values is equal to mean of historical data $\{y_1,\dots,y_T\}$.
-  * Forecasts: $\hat{y}_{T+h|T} = \bar{y} = (y_1+\dots+y_T)/T$
+* Forecast of all future values is equal to mean of historical data $\{y_1,\dots,y_T\}$.
+* Forecasts: $\hat{y}_{T+h|T} = \bar{y} = (y_1+\dots+y_T)/T$
 
 ### Naïve method
 
-  * Forecasts equal to last observed value.
-  * Forecasts: $\hat{y}_{T+h|T} =y_T$.
-  * Consequence of efficient market hypothesis.
+* Forecasts equal to last observed value.
+* Forecasts: $\hat{y}_{T+h|T} =y_T$.
+* Consequence of efficient market hypothesis.
 
 ## Some simple forecasting methods
 
 ### Seasonal naïve method
 
-  * Forecasts equal to last value from same season.
-  * Forecasts: $\hat{y}_{T+h|T} =y_{T+h-m(k+1)}$, where $m=$ seasonal period and $k$ is the integer part of $\frac{h-1}{m}$.
+* Forecasts equal to last value from same season.
+* Forecasts: $\hat{y}_{T+h|T} =y_{T+h-m(k+1)}$, where $m=$ seasonal period and $k$ is the integer part of $\frac{h-1}{m}$.
 
 ## Some simple forecasting methods
 
 ### Drift method
 
- * Forecasts equal to last value plus average change.
- * Forecasts: $\hat{y}_{T+h|T} = y_{T} + \frac{h}{T-1} \sum_{t=2}^T X_i (y_t-y_{t-1}) =\\ = y_T + h\frac{y_T - y_1}{T-1}$.
+* Forecasts equal to last value plus average change.
+* Forecasts: $\hat{y}_{T+h|T} = y_{T} + \frac{h}{T-1} \sum_{t=2}^T X_i (y_t-y_{t-1}) =\\ = y_T + h\frac{y_T - y_1}{T-1}$.
 
-
-   * Equivalent to extrapolating a line drawn between first and last observations.
+* Equivalent to extrapolating a line drawn between first and last observations.
 
 ## Some simple forecasting methods
 
@@ -104,16 +103,16 @@ autoplot(dj2) +
 
 ## Some simple forecasting methods
 
-  * Mean: `meanf(y, h=20)`
-  * Naïve:  `naive(y, h=20)`
-  * Seasonal naïve: `snaive(y, h=20)`
-  * Drift: `rwf(y, drift=TRUE, h=20)`
+* Mean: `meanf(y, h=20)`
+* Naïve:  `naive(y, h=20)`
+* Seasonal naïve: `snaive(y, h=20)`
+* Drift: `rwf(y, drift=TRUE, h=20)`
 
 ### Your turn
 
- * Use these four functions to produce forecasts for `goog` and `auscafe`.
- * Plot the results using `autoplot()`.
- 
+* Use these four functions to produce forecasts for `goog` and `auscafe`.
+* Plot the results using `autoplot()`.
+
 ## goog
 
 ```{r googf, warning=FALSE, message=FALSE, echo=FALSE, fig.height=4.6}
@@ -208,8 +207,8 @@ autoplot(-1/elec) +
 Each of these transformations is close to a member of the
 family of Box-Cox transformations:
 $$w_t = \left\{\begin{array}{ll}
-        \log(y_t),      & \quad \lambda = 0; \\
-        (y_t^\lambda-1)/\lambda ,         & \quad \lambda \ne 0.
+\log(y_t),      & \quad \lambda = 0; \\
+(y_t^\lambda-1)/\lambda ,         & \quad \lambda \ne 0.
 \end{array}\right.
 $$
 
@@ -220,9 +219,9 @@ $$
 
 
 ```{r elec5, cache=TRUE, echo=FALSE, include=FALSE}
-## Box-Cox transformations
-library(latex2exp)
-#lambda <- seq(1, -1, by=-0.01)
+# ## Box-Cox transformations
+# library(latex2exp)
+# lambda <- seq(1, -1, by=-0.1)
 # for(i in seq_along(lambda))
 # {
 #   #savepdf(paste("elecBC",i,sep=""))
@@ -236,7 +235,7 @@ library(latex2exp)
 #           axis.text.y=element_blank(),
 #           axis.ticks.y=element_blank()))
 #   #endpdf()
-#}
+# }
 ```
 
 ## Box-Cox transformations
@@ -290,8 +289,8 @@ We must reverse the transformation (or back-transform) to obtain
 forecasts on the original scale.  The reverse Box-Cox transformations are given
 by
 $$ y_t = \left\{\begin{array}{ll}
-        \exp(w_t),      & \quad \lambda = 0; \\
-        (\lambda W_t+1)^{1/\lambda} ,   & \quad \lambda \ne 0.
+\exp(w_t),      & \quad \lambda = 0; \\
+(\lambda W_t+1)^{1/\lambda} ,   & \quad \lambda \ne 0.
 \end{array}\right.$$
 
 ## Back-transformation
@@ -324,13 +323,9 @@ fit <- snaive(gas, lambda=lambda)
 lambda
 ```
 
-##
-
 ```{r gas2,echo=TRUE,fig.height=4}
 autoplot(fit, include=120)
 ```
-
-##
 
 ```{r gas3,echo=TRUE,fig.height=3.6}
 fit <- snaive(gas, lambda=1/3)
@@ -339,8 +334,8 @@ autoplot(fit)
 
 ## Bias adjustment
 
-  * Back-transformed point forecasts are medians.
-  * Back-transformed PI have the correct coverage.
+* Back-transformed point forecasts are medians.
+* Back-transformed PI have the correct coverage.
 
 **Back-transformed means**
 
@@ -382,7 +377,7 @@ $$Y = f(X) = f(\mu) + \frac12 \sigma^2 f''(\mu)$$
 ```{r biasadj, fig.height=3}
 fc <- rwf(eggs, drift=TRUE, lambda=0, h=50, level=80)
 fc2 <- rwf(eggs, drift=TRUE, lambda=0, h=50, level=80,
-  biasadj=TRUE)
+           biasadj=TRUE)
 autoplot(eggs) +
   autolayer(fc, series="Simple back transformation") +
   autolayer(fc2, series="Bias adjusted", PI=FALSE) +
@@ -393,15 +388,15 @@ autoplot(eggs) +
 
 ## Fitted values
 
- - $\hat{y}_{t|t-1}$ is the forecast of $y_t$ based on observations $y_1,\dots,y_t$.
- - We call these "fitted values".
- - Sometimes drop the subscript: $\hat{y}_t \equiv \hat{y}_{t|t-1}$.
- - Often not true forecasts since parameters are estimated on all data.
+- $\hat{y}_{t|t-1}$ is the forecast of $y_t$ based on observations $y_1,\dots,y_t$.
+- We call these "fitted values".
+- Sometimes drop the subscript: $\hat{y}_t \equiv \hat{y}_{t|t-1}$.
+- Often not true forecasts since parameters are estimated on all data.
 
 ### For example:
 
- - $\hat{y}_{t} = \bar{y}$ for average method.
- - $\hat{y}_{t} = y_{t-1} + \frac{y_{T}-y_1}{T-1}$ for drift method.
+- $\hat{y}_{t} = \bar{y}$ for average method.
+- $\hat{y}_{t} = y_{t-1} + \frac{y_{T}-y_1}{T-1}$ for drift method.
 
 ## Forecasting residuals
 
@@ -409,13 +404,13 @@ Residuals in forecasting: difference between observed value and its fitted value
 
 Assumptions
 
-  1. $\{e_t\}$ uncorrelated. If they aren't, then information left in  residuals that should be used in computing forecasts.
-  2. $\{e_t\}$ have mean zero. If they don't, then forecasts are biased.
+1. $\{e_t\}$ uncorrelated. If they aren't, then information left in  residuals that should be used in computing forecasts.
+2. $\{e_t\}$ have mean zero. If they don't, then forecasts are biased.
 
 Useful properties (for prediction intervals)
 
-  3. $\{e_t\}$ have constant variance.
-  4. $\{e_t\}$ are normally distributed.
+3. $\{e_t\}$ have constant variance.
+4. $\{e_t\}$ are normally distributed.
 
 ## Example: Google stock price
 
@@ -467,11 +462,11 @@ ggAcf(res) + ggtitle("ACF of residuals")
 
 ## ACF of residuals
 
-  * We assume that the residuals are white noise (uncorrelated, mean zero, constant variance). If they aren't, then there is information left in  the residuals that should be used in computing forecasts.
+* We assume that the residuals are white noise (uncorrelated, mean zero, constant variance). If they aren't, then there is information left in  the residuals that should be used in computing forecasts.
 
-  * So a standard residual diagnostic is to check the ACF of the residuals of a forecasting method.
+* So a standard residual diagnostic is to check the ACF of the residuals of a forecasting method.
 
-  * We expect these to look like white noise.
+* We expect these to look like white noise.
 
 ## Portmanteau tests
 
@@ -483,8 +478,8 @@ $Q = T \sum_{k=1}^h r_k^2$
 where $h$  is max lag being considered and $T$ is number of observations.
 
 
-  * If each $r_k$ close to zero, $Q$ will be **small**.
-  * If some $r_k$ values large (positive or negative), $Q$ will be **large**.
+* If each $r_k$ close to zero, $Q$ will be **small**.
+* If some $r_k$ values large (positive or negative), $Q$ will be **large**.
 
 ## Portmanteau tests
 
@@ -496,14 +491,14 @@ $Q^* = T(T+2) \sum_{k=1}^h (T-k)^{-1}r_k^2$
 where $h$  is max lag being considered and $T$ is number of observations.
 
 
-  * My preferences: $h=10$ for non-seasonal data, $h=2m$ for seasonal data.
-  * Better performance, especially in small samples.
+* My preferences: $h=10$ for non-seasonal data, $h=2m$ for seasonal data.
+* Better performance, especially in small samples.
 
 ## Portmanteau tests
 
-  * If data are WN, $Q^*$ has $\chi^2$ distribution with  $(h - K)$ degrees of freedom where $K=$ no.\ parameters in model.
-  * When applied to raw data, set $K=0$.
-  * For the Google example:
+* If data are WN, $Q^*$ has $\chi^2$ distribution with  $(h - K)$ degrees of freedom where $K=$ no.\ parameters in model.
+* When applied to raw data, set $K=0$.
+* For the Google example:
 
 ```{r dj9, echo=TRUE}
 # lag=h and fitdf=K
@@ -523,12 +518,12 @@ object <- naive(goog200)
 main <- paste("Residuals from", object$method)
 res <- residuals(object)
 # Do Ljung-Box test
-      LBtest <- Box.test(zoo::na.approx(res), fitdf=0, lag=10, type="Ljung")
-      LBtest$method <- "Ljung-Box test"
-      LBtest$data.name <- main
-      names(LBtest$statistic) <- "Q*"
-      print(LBtest)
-      cat(paste("Model df: ",0,".   Total lags used: ",10,"\n\n",sep=""))
+LBtest <- Box.test(zoo::na.approx(res), fitdf=0, lag=10, type="Ljung")
+LBtest$method <- "Ljung-Box test"
+LBtest$data.name <- main
+names(LBtest$statistic) <- "Q*"
+print(LBtest)
+cat(paste("Model df: ",0,".   Total lags used: ",10,"\n\n",sep=""))
 ```
 
 ## Your turn
@@ -572,14 +567,14 @@ text(21,1,"Test data",col="red")
 -   A model which fits the training data well will not necessarily forecast well.
 -   A perfect fit can always be obtained by using a model with enough parameters.
 -   Over-fitting a model to data is just as bad as failing to identify a systematic pattern in the data.
-  * The test set must not be used for **any** aspect of model development or calculation of forecasts.
-  * Forecast accuracy is based only on the test set.
+* The test set must not be used for **any** aspect of model development or calculation of forecasts.
+* Forecast accuracy is based only on the test set.
 
 ## Forecast errors
 
 Forecast `error`: the difference between an observed value and its forecast.
 $$
-  e_{T+h} = y_{T+h} - \hat{y}_{T+h|T},
+e_{T+h} = y_{T+h} - \hat{y}_{T+h|T},
 $$
 where the training data is given by $\{y_1,\dots,y_T\}$
 
@@ -619,8 +614,8 @@ $e_{T+h} =$  & $y_{T+h} - \pred{y}{T+h}{T}$
 \text{MAPE} &= 100\text{mean}(|e_{T+h}|/ |y_{T+h}|)
 \end{align*}\vspace*{0.3cm}
 
-  * MAE, MSE, RMSE are all scale dependent.
-  * MAPE is scale independent but is only sensible if $y_t\gg 0$ for all $t$, and $y$ has a natural zero.
+* MAE, MSE, RMSE are all scale dependent.
+* MAPE is scale independent but is only sensible if $y_t\gg 0$ for all $t$, and $y$ has a natural zero.
 
 ## Measures of forecast accuracy
 
@@ -656,7 +651,7 @@ autoplot(tmp) + xlab("Year") + ylab("Megalitres") +
 
 ## Measures of forecast accuracy
 
-```r
+```{r}
 beer2 <- window(ausbeer, start=1992, end=c(2007,4))
 beer3 <- window(ausbeer, start=2008)
 beerfit1 <- meanf(beer2, h=10)
@@ -680,11 +675,11 @@ knitr::kable(tab, digits=2)
 
 ## Poll: true or false?
 
-  1. Good forecast methods should have normally distributed residuals.
-  2. A model with small residuals will give good forecasts.
-  3. The best measure of forecast accuracy is MAPE.
-  4. If your model doesn't forecast well, you should make it more complicated.
-  5. Always choose the model with the best forecast accuracy as measured on the test set.
+1. Good forecast methods should have normally distributed residuals.
+2. A model with small residuals will give good forecasts.
+3. The best measure of forecast accuracy is MAPE.
+4. If your model doesn't forecast well, you should make it more complicated.
+5. Always choose the model with the best forecast accuracy as measured on the test set.
 
 ## Time series cross-validation {-}
 
@@ -725,7 +720,7 @@ text(21,1,"Test data",col="red")
 ```{r cv1, cache=TRUE, echo=FALSE, fig.height=4}
 par(mar=c(0,0,0,0))
 plot(0,0,xlim=c(0,28),ylim=c(0,1),
-       xaxt="n",yaxt="n",bty="n",xlab="",ylab="",type="n")
+     xaxt="n",yaxt="n",bty="n",xlab="",ylab="",type="n")
 i <- 1
 for(j in 1:10)
 {
@@ -743,8 +738,8 @@ for(j in 1:10)
 text(28,.95,"time")
 ```
 
- * Forecast accuracy averaged over test sets.
- * Also known as "evaluation on a rolling forecasting origin"
+* Forecast accuracy averaged over test sets.
+* Also known as "evaluation on a rolling forecasting origin"
 
 ## tsCV function:
 
@@ -752,7 +747,7 @@ text(28,.95,"time")
 e <- tsCV(goog200, rwf, drift=TRUE, h=1)
 sqrt(mean(e^2, na.rm=TRUE))
 sqrt(mean(residuals(rwf(goog200, drift=TRUE))^2,
-                                     na.rm=TRUE))
+          na.rm=TRUE))
 ```
 
 A good way to choose the best forecasting model is to find the model with the smallest RMSE computed using time series cross-validation.
@@ -765,14 +760,14 @@ Ugly code:
 e <- tsCV(goog200, rwf, drift=TRUE, h=1)
 sqrt(mean(e^2, na.rm=TRUE))
 sqrt(mean(residuals(rwf(goog200, drift=TRUE))^2,
-                                     na.rm=TRUE))
+na.rm=TRUE))
 ```
 
 Better with a pipe:
 
 ```r
 goog200 %>%
-  tsCV(forecastfunction=rwf, drift=TRUE, h=1) -> e
+tsCV(forecastfunction=rwf, drift=TRUE, h=1) -> e
 e^2 %>% mean(na.rm=TRUE) %>% sqrt
 goog200 %>% rwf(drift=TRUE) %>% residuals -> res
 res^2 %>% mean(na.rm=TRUE) %>% sqrt
@@ -782,17 +777,17 @@ res^2 %>% mean(na.rm=TRUE) %>% sqrt
 
 ## Prediction intervals
 
- * A forecast $\hat{y}_{T+h|T}$ is (usually) the mean of the conditional distribution $y_{T+h} \mid y_1, \dots, y_{T}$.
- * A prediction interval gives a region within which we expect $y_{T+h}$ to lie with a specified probability.
- * Assuming forecast errors are normally distributed, then a 95% PI is
- \begin{alertblock}{}
+* A forecast $\hat{y}_{T+h|T}$ is (usually) the mean of the conditional distribution $y_{T+h} \mid y_1, \dots, y_{T}$.
+* A prediction interval gives a region within which we expect $y_{T+h}$ to lie with a specified probability.
+* Assuming forecast errors are normally distributed, then a 95% PI is
+\begin{alertblock}{}
 \centerline{$
-  \hat{y}_{T+h|T} \pm 1.96 \hat\sigma_h
+\hat{y}_{T+h|T} \pm 1.96 \hat\sigma_h
 $}
 \end{alertblock}
 where $\hat\sigma_h$ is the st dev of the $h$-step distribution.
 
- * When $h=1$, $\hat\sigma_h$ can be estimated from the residuals.
+* When $h=1$, $\hat\sigma_h$ can be estimated from the residuals.
 
 ## Prediction intervals
 
@@ -809,9 +804,9 @@ naive(goog200, level=95)
 
 ## Prediction intervals
 
- * Point forecasts are often useless without prediction intervals.
- * Prediction intervals require a stochastic model (with random errors, etc).
- * Multi-step forecasts for time series require a more sophisticated approach (with PI getting wider as the forecast horizon increases).
+* Point forecasts are often useless without prediction intervals.
+* Prediction intervals require a stochastic model (with random errors, etc).
+* Multi-step forecasts for time series require a more sophisticated approach (with PI getting wider as the forecast horizon increases).
 
 ## Prediction intervals
 
@@ -828,7 +823,688 @@ Note that when $h=1$ and $T$ is large, these all give the same approximate value
 
 ## Prediction intervals
 
-  * Computed automatically using: `naive()`, `snaive()`, `rwf()`, `meanf()`, etc.
-  * Use `level` argument to control coverage.
-  * Check residual assumptions before believing them.
-  * Usually too narrow due to unaccounted uncertainty.
+* Computed automatically using: `naive()`, `snaive()`, `rwf()`, `meanf()`, etc.
+* Use `level` argument to control coverage.
+* Check residual assumptions before believing them.
+* Usually too narrow due to unaccounted uncertainty.
+
+# Exercises
+
+## Exercises 1
+
+For the following series, find an appropriate Box-Cox transformation in order to stabilise the variance.
+
+* usnetelec
+
+## Variance stabilization
+
+```{r usnetelec, echo=FALSE, fig.height=4.6}
+autoplot(usnetelec) +
+  xlab("Year") + ylab("") +
+  ggtitle("Annual US net electricity generation")
+
+autoplot(usnetelec^0.5) +
+  xlab("Year") + ylab("") +
+  ggtitle("Annual US net electricity generation")
+
+autoplot(usnetelec^0.33333) +
+  xlab("Year") + ylab("") +
+  ggtitle("Annual US net electricity generation")
+
+autoplot(log(usnetelec)) +
+  xlab("Year") + ylab("") +
+  ggtitle("Annual US net electricity generation")
+
+autoplot(-1/usnetelec) +
+  xlab("Year") + ylab("") +
+  ggtitle("Annual US net electricity generation")
+
+autoplot(BoxCox(usnetelec,lambda=1))
+autoplot(BoxCox(usnetelec,lambda=1/3))
+autoplot(BoxCox(usnetelec,lambda=1/2))
+
+lambda <- BoxCox.lambda(usnetelec)
+autoplot(BoxCox(usnetelec,lambda))
+```
+
+* usgdp
+
+```{r usnetelec, echo=FALSE, fig.height=4.6}
+autoplot(usgdp) +
+  xlab("Year") + ylab("") +
+  ggtitle("Quarterly US GDP")
+
+autoplot(usgdp^0.5) +
+  xlab("Year") + ylab("") +
+  ggtitle("Quarterly US GDP")
+
+autoplot(usgdp^0.33333) +
+  xlab("Year") + ylab("") +
+  ggtitle("Quarterly US GDP")
+
+autoplot(log(usgdp)) +
+  xlab("Year") + ylab("") +
+  ggtitle("Quarterly US GDP")
+
+autoplot(-1/usgdp) +
+  xlab("Year") + ylab("") +
+  ggtitle("Quarterly US GDP")
+
+autoplot(BoxCox(usgdp,lambda=1))
+autoplot(BoxCox(usgdp,lambda=1/3))
+autoplot(BoxCox(usgdp,lambda=1/2))
+
+lambda <- BoxCox.lambda(usgdp)
+autoplot(BoxCox(usgdp,lambda))
+```
+
+* mcopper
+
+```{r mcopper, echo=FALSE, fig.height=4.6}
+autoplot(mcopper) +
+  xlab("Year") + ylab("") +
+  ggtitle("Monthly copper prices")
+
+autoplot(mcopper^0.5) +
+  xlab("Year") + ylab("") +
+  ggtitle("Monthly copper prices")
+
+autoplot(mcopper^0.33333) +
+  xlab("Year") + ylab("") +
+  ggtitle("Monthly copper prices")
+
+autoplot(log(mcopper)) +
+  xlab("Year") + ylab("") +
+  ggtitle("Monthly copper prices")
+
+autoplot(-1/mcopper) +
+  xlab("Year") + ylab("") +
+  ggtitle("Monthly copper prices")
+
+autoplot(BoxCox(mcopper,lambda=1))
+autoplot(BoxCox(mcopper,lambda=1/3))
+autoplot(BoxCox(mcopper,lambda=1/2))
+
+lambda <- BoxCox.lambda(mcopper)
+autoplot(BoxCox(mcopper,lambda))
+```
+
+* enplanements
+
+```{r enplanements, echo=FALSE, fig.height=4.6}
+autoplot(enplanements) +
+  xlab("Year") + ylab("") +
+  ggtitle("Monthly US domestic enplanements")
+
+autoplot(enplanements^0.5) +
+  xlab("Year") + ylab("") +
+  ggtitle("Monthly US domestic enplanements")
+
+autoplot(enplanements^0.33333) +
+  xlab("Year") + ylab("") +
+  ggtitle("Monthly US domestic enplanements")
+
+autoplot(log(enplanements)) +
+  xlab("Year") + ylab("") +
+  ggtitle("Monthly US domestic enplanements")
+
+autoplot(-1/enplanements) +
+  xlab("Year") + ylab("") +
+  ggtitle("Monthly US domestic enplanements")
+
+autoplot(BoxCox(enplanements,lambda=1))
+autoplot(BoxCox(enplanements,lambda=1/3))
+autoplot(BoxCox(enplanements,lambda=1/2))
+
+lambda <- BoxCox.lambda(enplanements)
+autoplot(BoxCox(enplanements,lambda))
+```
+
+## Exercises 2
+
+Why is a Box-Cox transformation unhelpful for the cangas data?
+
+```{r cangas , echo=FALSE, fig.height=4.6}
+autoplot(cangas) +
+  xlab("Year") + ylab("") +
+  ggtitle("Monthly Canadian gas production")
+```
+
+```{r}
+lambda <- BoxCox.lambda(cangas)
+autoplot(BoxCox(cangas,lambda))
+```
+
+Box-Cox transformation doesn't yield a better model.
+
+## Exercises 3
+
+What Box-Cox transformation would you select for your retail data (from Exercise 3 in Section 2.10)?
+
+```{r}
+retaildata <- readxl::read_excel("data/retail.xlsx", skip=1)
+myts <- ts(retaildata[,"A3349873A"], frequency=12, start=c(1982,4))
+autoplot(myts)
+lambda <- BoxCox.lambda(myts)
+print(c("Selected lambda:", lambda))
+
+fc_retail <- rwf(myts, 
+                 drift = TRUE, 
+                 lambda = lambda,
+                 h = 50,
+                 level = 80)
+
+fc_retail_biasadj <- rwf(myts, 
+                         drift = TRUE, 
+                         lambda = lambda,
+                         h = 50,
+                         level = 80,
+                         biasadj = TRUE)
+
+autoplot(myts) +
+  autolayer(fc_retail, series = "Drift method with Box-Cox Transformation") +
+  autolayer(fc_retail_biasadj$mean, series = "Bias Adjusted") +
+  guides(colour = guide_legend(title = "Forecast"))
+
+autoplot(BoxCox(myts,lambda))
+```
+
+## Exercises 4
+
+For each of the following series, make a graph of the data. If transforming seems appropriate, do so and describe the effect. `dole`, `usdeaths`, `bricksq`.
+
+```{r}
+autoplot(dole)
+lambda <- BoxCox.lambda(dole)
+autoplot(BoxCox(dole,lambda))
+
+# transforming not appropriate
+autoplot(usdeaths)
+lambda <- BoxCox.lambda(usdeaths)
+autoplot(BoxCox(dole,usdeaths))
+
+# transforming not appropriate
+autoplot(bricksq)
+lambda <- BoxCox.lambda(bricksq)
+autoplot(BoxCox(bricksq,lambda))
+```
+
+- For `dole`, using Box-Cox Transformation would be be appropriate
+- For `usdeaths`, using Box-Cox Transformation would not be be appropriate
+- For `bricksq`, using Box-Cox Transformation would not be be appropriate
+
+## Exercises 5
+
+Calculate the residuals from a seasonal naïve forecast applied to the quarterly Australian beer production data from 1992. The following code will help.
+
+```{r}
+beer <- window(ausbeer, start=1992)
+fc <- snaive(beer)
+autoplot(fc)
+res <- residuals(fc)
+autoplot(res)
+```
+
+Test if the residuals are white noise and normally distributed.
+
+```{r}
+checkresiduals(fc)
+```
+
+What do you conclude?
+
+H0: The data are independently distributed
+Ha: The data are not independently distributed; they exhibit serial correlation.
+
+The ACF plot result indicates that the residuals aren't white noise because of significant spike at lag 4. The Ljung-Box test shows that it is statistically significant. The residuals aren't white noise and aren't normally distributed.
+
+## Exercises 6
+
+Repeat the exercise for the WWWusage and bricksq data. Use whichever of naive() or snaive() is more appropriate in each case.
+
+TODO: check for random walk
+
+```{r}
+fc <- naive(WWWusage)
+autoplot(fc)
+res <- residuals(fc)
+autoplot(res)
+checkresiduals(fc)
+accuracy(fc)
+
+fc <- snaive(WWWusage)
+autoplot(fc)
+res <- residuals(fc)
+autoplot(res)
+checkresiduals(fc)
+accuracy(fc)
+```
+
+The ACF plot indicates that the residuals aren't white noise because of existence of significant spikes. The Ljung-Box test shows that they are statistically significant for both of methods. The residuals aren't white noise and aren't normally distributed.
+
+The naive method is prefered because there isn't any particular seasonal pattern in the data and the Q values of Ljung-Box test were same for both methods.
+
+```{r}
+fc <- naive(bricksq)
+autoplot(fc)
+res <- residuals(fc)
+autoplot(res)
+checkresiduals(fc)
+accuracy(fc)
+
+fc <- snaive(bricksq)
+autoplot(fc)
+res <- residuals(fc)
+autoplot(res)
+checkresiduals(fc)
+accuracy(fc)
+```
+
+The ACF plot indicates that the residuals aren't white noise because of existence of significant spikes. The Ljung-Box test shows that they are statistically significant for both of methods. The residuals aren't white noise and aren't normally distributed.
+
+The snaive method is prefered method because there is seasonality in the data and the Q value of Ljung-Box of snaive methods was less than the value of naive method.
+
+## Exercises 7
+
+Are the following statements true or false? Explain your answer.
+
+- Good forecast methods should have normally distributed residuals.
+- A model with small residuals will give good forecasts.
+- The best measure of forecast accuracy is MAPE.
+- If your model doesn’t forecast well, you should make it more complicated.
+- Always choose the model with the best forecast accuracy as measured on the test set.
+
+## Exercises 8
+
+For your retail time series (from Exercise 3 in Section 2.10):
+
+Split the data into two parts using
+
+```{r}
+# three year of test
+myts.train <- window(myts, end=c(2010,12))
+myts.test <- window(myts, start=2011)
+```
+
+Check that your data have been split appropriately by producing the following plot.
+
+```{r}
+autoplot(myts) +
+  autolayer(myts.train, series="Training") +
+  autolayer(myts.test, series="Test")
+```
+
+Calculate forecasts using snaive applied to myts.train.
+
+```{r}
+fc <- snaive(myts.train)
+```
+
+Compare the accuracy of your forecasts against the actual values stored in myts.test.
+
+```{r}
+accuracy(fc,myts.test)
+```
+
+Check the residuals.
+
+```{r}
+checkresiduals(fc)
+```
+
+Do the residuals appear to be uncorrelated and normally distributed?
+
+The residuals appear to be correlated and normally distributed.
+
+How sensitive are the accuracy measures to the training/test split?
+
+```{r}
+# four year of test
+myts.train4 <- window(myts, end=c(2009,12))
+myts.test4 <- window(myts, start=2010)
+fc4 <- snaive(myts.train4)
+checkresiduals(fc4)
+autoplot(myts) +
+  autolayer(myts.train4, series="Training") +
+  autolayer(myts.test4, series="Test")
+
+# two year of test
+myts.train2 <- window(myts, end=c(2011,12))
+myts.test2 <- window(myts, start=2012)
+fc2 <- snaive(myts.train2)
+checkresiduals(fc2)
+autoplot(myts) +
+  autolayer(myts.train2, series="Training") +
+  autolayer(myts.test2, series="Test")
+
+# one year of test
+myts.train1 <- window(myts, end=c(2012,12))
+myts.test1 <- window(myts, start=2013)
+fc1 <- snaive(myts.train1)
+checkresiduals(fc1)
+autoplot(myts) +
+  autolayer(myts.train1, series="Training") +
+  autolayer(myts.test1, series="Test")
+
+accuracy(fc1,myts.test1)
+accuracy(fc2,myts.test2)
+accuracy(fc,myts.test)
+accuracy(fc4,myts.test4)
+```
+
+Sensitivity as the ratio of the test set error to the train set error. Mean Error is highly sensitive, RMSE, MAE, MPE, MASE are sensitive and MAPE and ACF1 are not as sensitive.
+
+## Exercises 9
+
+visnights contains quarterly visitor nights (in millions) from 1998 to 2016 for twenty regions of Australia.
+
+Use window() to create three training sets for `visnights[,"QLDMetro"]`, omitting the last 1, 2 and 3 years; call these train1, train2, and train3, respectively. 
+For example `train1 <- window(visnights[, "QLDMetro"], end = c(2015, 4))`.
+
+Compute one year of forecasts for each training set using the snaive() method. Call these `fc1`, `fc2` and `fc3`, respectively.
+
+Use accuracy() to compare the MAPE over the three test sets. Comment on these.
+
+```{r}
+#omitting the last 1 years
+train1 <- window(visnights[, "QLDMetro"], end = c(2015, 4))
+test1 <- window(visnights[, "QLDMetro"], start = 2016)
+fc1 <- snaive(train1)
+autoplot(visnights[, "QLDMetro"]) +
+  autolayer(train1, series="Training") +
+  autolayer(test1, series="Test")
+
+#omitting the last 2 years
+train2 <- window(visnights[, "QLDMetro"], end = c(2014, 4))
+test2 <- window(visnights[, "QLDMetro"], start = 2015)
+fc2 <- snaive(train2)
+autoplot(visnights[, "QLDMetro"]) +
+  autolayer(train2, series="Training") +
+  autolayer(test2, series="Test")
+
+#omitting the last 3 years
+train3 <- window(visnights[, "QLDMetro"], end = c(2013, 4))
+test3 <- window(visnights[, "QLDMetro"], start = 2014)
+fc3 <- snaive(train3)
+autoplot(visnights[, "QLDMetro"]) +
+  autolayer(train3, series="Training") +
+  autolayer(test3, series="Test")
+
+accuracy(fc1,test1)
+accuracy(fc2,test2)
+accuracy(fc3,test3)
+
+autoplot(fc1)
+autoplot(fc2)
+autoplot(fc3)
+```
+MAPE was smallest for 2015 prediction and biggest for 2014 prediction. MAPE became smaller in 2013 prediction, but it was not smaller than the 2015 prediction.
+
+## Exercises 10
+
+Use the Dow Jones index (data set `dowjones`) to do the following:
+
+Produce a time plot of the series.
+
+```{r}
+autoplot(dowjones) +
+  ggtitle("Dow-Jones index") +
+  xlab("Year") + ylab("")
+```
+
+Produce forecasts using the drift method and plot them.
+
+```{r}
+autoplot(dowjones) +
+  ggtitle("Dow-Jones index") +
+  xlab("Year") + ylab("") +
+  autolayer(rwf(dowjones, drift=TRUE, h=40),
+            series="Drift", PI=FALSE) +
+  guides(colour=guide_legend(title="Forecast"))
+```
+
+Show that the forecasts are identical to extending the line drawn between the first and last observations.
+
+```{r}
+dj_x <- c(1, 78)
+dj_y <- c(dowjones[1], dowjones[78])
+lm_dj <- lm(dj_y ~ dj_x)
+
+autoplot(rwf(dowjones, drift=TRUE, h=40)) +
+  geom_abline(intercept = lm_dj$coefficients[1],
+              slope = lm_dj$coefficients[2],
+              colour = "red")
+
+autoplot(rwf(dowjones, drift=TRUE, h=40)) +
+  geom_line(aes(x = c(1, 78),
+                y = dowjones[c(1, 78)]), 
+            colour = "red")
+```
+
+Try using some of the other benchmark functions to forecast the same data set. Which do you think is best? Why?
+
+```{r}
+autoplot(dowjones) +
+  ggtitle("Dow-Jones index") +
+  xlab("Year") + ylab("") +
+  autolayer(rwf(dowjones, drift=TRUE, h=40),
+            series="Drift", PI=FALSE) +
+  autolayer(meanf(dowjones, h=40),
+            series="Mean", PI=FALSE) +
+  autolayer(rwf(dowjones, h=40),
+            series="Naïve", PI=FALSE) +
+  guides(colour=guide_legend(title="Forecast"))
+```
+
+naive method is good method because it is really difficult to predict stock price with past observations.  It is safer to just predict by taking the value of last observation using naive method.
+
+## Exercises 11
+
+Consider the daily closing IBM stock prices (data set `ibmclose`).
+
+
+Produce some plots of the data in order to become familiar with it.
+
+```{r}
+autoplot(ibmclose) +
+  ggtitle("Daily closing IBM stock price") +
+  xlab("Date") + ylab("US Dollars")
+```
+
+Split the data into a training set of 300 observations and a test set of 69 observations.
+
+```{r}
+ibmclose_train <- subset(ibmclose, end = 300)
+ibmclose_test <- subset(ibmclose, start = 301)
+```
+
+Try using various benchmark methods to forecast the training set and compare the results on the test set. Which method did best?
+
+```{r}
+snaive_ibm <- snaive(ibmclose_train, h = 69)
+mean_ibm <- meanf(ibmclose_train, h = 69)
+naive_ibm <- naive(ibmclose_train, h = 69)
+drift_ibm <- rwf(ibmclose_train, drift = TRUE, h = 69)
+
+autoplot(snaive_ibm)
+autoplot(mean_ibm)
+autoplot(naive_ibm)
+autoplot(drift_ibm)
+
+autoplot(snaive_ibm) +
+  autolayer(ibmclose_test) +
+  ggtitle("Daily closing IBM stock price (Seasonal naïve)") +
+  xlab("Year") + ylab("US Dollars") +
+  guides(colour=guide_legend(title="Forecast"))
+
+autoplot(mean_ibm) +
+  autolayer(ibmclose_test) +
+  ggtitle("Daily closing IBM stock price (Mean)") +
+  xlab("Year") + ylab("US Dollars") +
+  guides(colour=guide_legend(title="Forecast"))
+
+autoplot(naive_ibm) +
+  autolayer(ibmclose_test) +
+  ggtitle("Daily closing IBM stock price (naïve)") +
+  xlab("Year") + ylab("US Dollars") +
+  guides(colour=guide_legend(title="Forecast"))
+
+autoplot(drift_ibm) +
+  autolayer(ibmclose_test) +
+  ggtitle("Daily closing IBM stock price (Drift)") +
+  xlab("Year") + ylab("US Dollars") +
+  guides(colour=guide_legend(title="Forecast"))
+```
+
+```{r}
+accuracy(snaive_ibm, ibm_test)
+accuracy(mean_ibm, ibm_test)
+accuracy(naive_ibm, ibm_test)
+accuracy(drift_ibm, ibm_test)
+```
+
+Check the residuals of your preferred method. Do they resemble white noise?
+
+```{r}
+checkresiduals(naive_ibm)
+checkresiduals(drift_ibm)
+```
+
+```{r}
+e_snaive_ibm <- ibm_test - snaive_ibm$mean
+e_naive_ibm <- ibm_test - naive_ibm$mean
+e_drift_ibm <- ibm_test - drift_ibm$mean
+e_mean_ibm <- ibm_test - mean_ibm$mean
+
+
+autoplot(e_snaive_ibm^2, series = "snaive method") +
+  autolayer(e_naive_ibm^2, series = "naive method") +
+  autolayer(e_drift_ibm^2, series = "drift method") +
+  autolayer(e_mean_ibm^2, series = "mean method") +
+  guides(colour = guide_legend(title = "Forecast")) +
+  ggtitle("Errors of the forecast of closing IBM stock price") +
+  ylab(expression(paste("error", r^{2})))
+
+autoplot(e_naive_ibm^2, series = "naive method") +
+  autolayer(e_drift_ibm^2, series = "drift method") +
+  guides(colour = guide_legend(title = "Forecast")) +
+  ggtitle("Errors of the forecast of closing IBM stock price") +
+  ylab(expression(paste("error", r^{2})))
+```
+
+Drift method performed the best.
+
+```{r}
+ibmclose %>% tsCV(forecastfunction = snaive, h = 69) ->  e_snaive_ibm_CV
+ibmclose %>% tsCV(forecastfunction = naive, h = 69) ->  e_naive_ibm_CV
+ibmclose %>% tsCV(forecastfunction = rwf, drift = TRUE, h = 69) ->  e_drift_ibm_CV
+ibmclose %>% tsCV(forecastfunction = meanf, h = 69) ->  e_mean_ibm_CV
+
+mse_snaive <- colMeans(e_snaive_ibm_CV^2, na.rm = T)
+mse_naive <- colMeans(e_naive_ibm_CV^2, na.rm = T)
+mse_drift <- colMeans(e_drift_ibm_CV^2, na.rm = T)
+mse_mean <- colMeans(e_mean_ibm_CV^2, na.rm = T)
+
+
+# Plot the MSE values against the forecast horizon
+data.frame(h = 1:69, MSE = mse_snaive ) %>%
+  ggplot(aes(x = h, y = MSE)) + geom_point()
+
+
+mse_naive <- data.frame(h = 1:69, MSE = mse_naive, method = "Naive") 
+mse_snaive <- data.frame(h = 1:69, MSE = mse_snaive, method = "snaive")
+mse_drift <- data.frame(h = 1:69, MSE = mse_drift, method = "Drift")
+mse_mean <- data.frame(h = 1:69, MSE = mse_mean, method = "Mean")
+
+mse_data <- bind_rows(mse_naive, mse_snaive, mse_drift, mse_mean)
+
+ggplot(aes(x = h, y = MSE, colour = method), data = mse_data) + 
+  geom_point() +
+  guides(colour = guide_legend(title = "Forecast")) +
+  ggtitle("Errors of the forecast of closing IBM stock price",
+          subtitle = "after using tsCV function") +
+  theme(plot.title = element_text(hjust = 0.5),
+        plot.subtitle = element_text(hjust = 0.5)) +
+  ylab(expression(paste("erro", r^{2})))
+```
+
+Based on the returned results of tsCV function, the naive method yielded smallest error.
+
+## Exercises 12
+
+Consider the sales of new one-family houses in the USA, Jan 1973 – Nov 1995 (data set `hsales`).
+
+Produce some plots of the data in order to become familiar with it.
+
+```{r}
+autoplot(hsales) +
+  ggtitle("Monthly sales of one-family houses") +
+  xlab("Year") + ylab("Total Sales")
+
+plot(stl(hsales,"periodic"), main="Sales of new one-family houses, USA")
+```
+
+
+Split the hsales data set into a training set and a test set, where the test set is the last two years of data.
+
+```{r}
+hsales_train <- subset(hsales, end = length(hsales) - 24)
+hsales_test <- subset(hsales, start = length(hsales) - 23)
+```
+
+
+Try using various benchmark methods to forecast the training set and compare the results on the test set. Which method did best?
+
+```{r}
+snaive_hsales <- snaive(hsales_train, h = 24)
+mean_hsales <- meanf(hsales_train, h = 24)
+naive_hsales <- naive(hsales_train, h = 24)
+drift_hsales <- rwf(hsales_train, drift = TRUE, h = 24)
+
+autoplot(snaive_hsales)
+autoplot(mean_hsales)
+autoplot(naive_hsales)
+autoplot(drift_hsales)
+
+autoplot(snaive_hsales) +
+  autolayer(hsales_test) +
+  ggtitle("Monthly sales of one-family houses (Seasonal naïve)") +
+  xlab("Year") + ylab("Total Sales") +
+  guides(colour=guide_legend(title="Forecast"))
+
+autoplot(mean_hsales) +
+  autolayer(hsales_test) +
+  ggtitle("Monthly sales of one-family houses (Mean)") +
+  xlab("Year") + ylab("Total Sales") +
+  guides(colour=guide_legend(title="Forecast"))
+
+autoplot(naive_hsales) +
+  autolayer(hsales_test) +
+  ggtitle("Monthly sales of one-family houses (naïve)") +
+  xlab("Year") + ylab("Total Sales") +
+  guides(colour=guide_legend(title="Forecast"))
+
+autoplot(drift_hsales) +
+  autolayer(hsales_test) +
+  ggtitle("Monthly sales of one-family houses (Drift)") +
+  xlab("Year") + ylab("Total Sales") +
+  guides(colour=guide_legend(title="Forecast"))
+```
+
+```{r}
+accuracy(snaive_hsales, hsales_test)
+accuracy(mean_hsales, hsales_test)
+accuracy(naive_hsales, hsales_test)
+accuracy(drift_hsales, hsales_test)
+```
+
+Seasonal naive method did the best.
+
+Check the residuals of your preferred method. Do they resemble white noise?
+
+```{r}
+checkresiduals(snaive_hsales)
+```
+
+The residuals don't resemble white noise.
+

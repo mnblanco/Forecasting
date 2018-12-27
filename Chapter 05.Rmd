@@ -1,13 +1,12 @@
 ---
 title: "Applied forecasting for business and economics"
 author: "Ch5. Regression models"
-date: "12/26/2018"
 output: html_document
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE, cache=TRUE, warning=FALSE, message=FALSE,
-  dev.args=list(bg=grey(0.9), pointsize=11))
+                      dev.args=list(bg=grey(0.9), pointsize=11))
 library(fpp2)
 library(knitr)
 ```
@@ -20,7 +19,7 @@ $y_t = \beta_0 + \beta_1 x_{1,t} + \beta_2 x_{2,t} + \cdots + \beta_kx_{k,t} + \
 
 * $y_t$ is the variable we want to predict: the `response` variable
 * Each $x_{j,t}$ is numerical and is called a `predictor`.
- They are usually assumed to be known for all past and future times.
+They are usually assumed to be known for all past and future times.
 
 * The coefficients $\beta_1,\dots,\beta_k$ measure the effect of each
 predictor after taking account of the effect of all other predictors
@@ -49,10 +48,10 @@ fit.cons <- tslm(Consumption ~ Income, data=uschange)
 uschange %>%
   as.data.frame %>%
   ggplot(aes(x=Income, y=Consumption)) +
-    ylab("Consumption (quarterly % change)") +
-    xlab("Income (quarterly % change)") +
-    geom_point() +
-    geom_smooth(method="lm", se=FALSE)
+  ylab("Consumption (quarterly % change)") +
+  xlab("Income (quarterly % change)") +
+  geom_point() +
+  geom_smooth(method="lm", se=FALSE)
 ```
 
 ## Example: US consumption expenditure
@@ -102,11 +101,11 @@ autoplot(uschange[,'Consumption'], series="Data") +
 cbind(Data=uschange[,"Consumption"], Fitted=fitted(fit.consMR)) %>%
   as.data.frame %>%
   ggplot(aes(x=Data, y=Fitted)) +
-    geom_point() +
-    xlab("Fitted (predicted values)") +
-    ylab("Data (actual values)") +
-    ggtitle("Percentage change in US consumption expenditure") +
-    geom_abline(intercept=0, slope=1)
+  geom_point() +
+  xlab("Fitted (predicted values)") +
+  ylab("Data (actual values)") +
+  ggtitle("Percentage change in US consumption expenditure") +
+  geom_abline(intercept=0, slope=1)
 ```
 
 ## Example: US consumption expenditure
@@ -155,7 +154,7 @@ $$y_{t}=\beta_{0}+\beta_{1}x_{t,1}+\dots+\beta_{k}x_{t,k}+u_{t}$$
 $${\hat {u}}_{t}=\beta_{0}+\beta_{1}x_{t,1}+\dots+\beta_{k}x_{t,k}+\rho_{1}{\hat {u}}_{t-1}+\dots +\rho_{p}{\hat {u}}_{t-p}+\varepsilon_{t}$$
 If $R^{2}$ statistic is calculated for this model, then
 $$
-  (T-p)R^{2}\,\sim \,\chi_{p}^{2},
+(T-p)R^{2}\,\sim \,\chi_{p}^{2},
 $$
 when there is no serial correlation up to lag $p$, and $T=$ length of series.
 
@@ -261,11 +260,11 @@ autoplot(beer, series="Data") +
 cbind(Data=beer, Fitted=fitted(fit.beer)) %>%
   as.data.frame %>%
   ggplot(aes(x=Data, y=Fitted, colour=as.factor(cycle(beer)))) +
-    geom_point() +
-    ylab("Fitted") + xlab("Actual values") +
-    ggtitle("Quarterly beer production") +
-    scale_colour_brewer(palette="Dark2", name="Quarter") +
-    geom_abline(intercept=0, slope=1)
+  geom_point() +
+  ylab("Fitted") + xlab("Actual values") +
+  ggtitle("Quarterly beer production") +
+  scale_colour_brewer(palette="Dark2", name="Quarter") +
+  geom_abline(intercept=0, slope=1)
 ```
 
 ## Beer production revisited
@@ -395,7 +394,7 @@ autoplot(marathon) +
 
 ```{r, echo=TRUE, fig.height=3.5}
 autoplot(residuals(fit.lin)) +
-    xlab("Year") + ylab("Residuals from a linear trend")
+  xlab("Year") + ylab("Residuals from a linear trend")
 ```
 
 ## Example: Boston marathon winning times
@@ -453,19 +452,21 @@ checkresiduals(fit.pw, test=FALSE)
 ## Interpolating splines
 
 ```{r,out.width = "80%"}
-include_graphics("draftspline.jpg")
+include_graphics("figs/draftspline.jpg")
 ```
 
 ## Interpolating splines
 
 ```{r,out.width = "80%"}
-include_graphics("spline.jpg")
+include_graphics("figs/spline.jpg")
 ```
+
 ## Interpolating splines
 
 ```{r,out.width = "80%"}
-include_graphics("spline2.jpg")
+include_graphics("figs/spline2.jpg")
 ```
+
 ## Interpolating splines
 
 A spline is a continuous function $f(x)$ interpolating all
@@ -538,11 +539,11 @@ autoplot(fc)
 
 ## splinef
 
- * Cubic **smoothing** splines (rather than cubic regression splines).
- * Still piecewise cubic, but with many more knots (one at each observation).
- * Coefficients constrained to prevent the curve becoming too "wiggly".
- * Degrees of freedom selected automatically.
- * Equivalent to ARIMA(0,2,2) and Holt's method.
+* Cubic **smoothing** splines (rather than cubic regression splines).
+* Still piecewise cubic, but with many more knots (one at each observation).
+* Coefficients constrained to prevent the curve becoming too "wiggly".
+* Degrees of freedom selected automatically.
+* Equivalent to ARIMA(0,2,2) and Holt's method.
 
 
 # Selecting predictors and forecast evaluation
@@ -628,7 +629,7 @@ kcvplot <- function(k,n)
   each <- round(n/k)
   ord <- sample(1:n,n)
   plot(0,0, xlim=c(0,n+2), ylim=c(1-k/n,1-1/n),
-    xaxt="n", yaxt="n", bty="n", xlab="", ylab="", type="n")
+       xaxt="n", yaxt="n", bty="n", xlab="", ylab="", type="n")
   for(j in 1:k)
   {
     test <- (1:n)[ord[(j-1)*each + (1:each)]]
@@ -656,7 +657,7 @@ The best model is the one with minimum CV.
 
 **Five-fold cross-validation**
 
- * 20 observations. 4 test observations per fold
+* 20 observations. 4 test observations per fold
 
 ```{r, fig.height=1.}
 kcvplot(5,20)
@@ -664,7 +665,7 @@ kcvplot(5,20)
 
 **Ten-fold cross-validation**
 
- * 20 observations. 2 test observations per fold
+* 20 observations. 2 test observations per fold
 
 ```{r, fig.height=2.}
 kcvplot(10,20)
@@ -743,39 +744,39 @@ model.
 
 ```{r, echo=TRUE}
 tslm(Consumption ~ Income + Production + Unemployment + Savings,
-  data=uschange) %>% CV()
+     data=uschange) %>% CV()
 tslm(Consumption ~ Income + Production + Unemployment,
-  data=uschange) %>% CV()
+     data=uschange) %>% CV()
 tslm(Consumption ~ Income + Production + Savings,
-  data=uschange) %>% CV()
+     data=uschange) %>% CV()
 tslm(Consumption ~ Income + Unemployment + Savings,
-  data=uschange) %>% CV()
+     data=uschange) %>% CV()
 tslm(Consumption ~ Production + Unemployment + Savings,
-  data=uschange) %>% CV()
+     data=uschange) %>% CV()
 ```
 
 # Forecasting with regression
 
 ## Ex-ante versus ex-post forecasts
 
- * *Ex ante forecasts* are made using only information available in advance.
-    - require forecasts of predictors
- * *Ex post forecasts* are made using later information on the predictors.
-    - useful for studying behaviour of forecasting models.
+* *Ex ante forecasts* are made using only information available in advance.
+- require forecasts of predictors
+* *Ex post forecasts* are made using later information on the predictors.
+- useful for studying behaviour of forecasting models.
 
- * trend, seasonal and calendar variables are all known in advance, so these don't need to be forecast.
+* trend, seasonal and calendar variables are all known in advance, so these don't need to be forecast.
 
 ## Scenario based forecasting
 
- * Assumes possible scenarios for the predictor variables
- * Prediction intervals for scenario based forecasts do not include the uncertainty associated with the future values of the predictor variables.
+* Assumes possible scenarios for the predictor variables
+* Prediction intervals for scenario based forecasts do not include the uncertainty associated with the future values of the predictor variables.
 
 ## Building a predictive regression model {-}
 
- * If getting forecasts of predictors is difficult, you can use lagged predictors instead.
+* If getting forecasts of predictors is difficult, you can use lagged predictors instead.
 $$y_{t}=\beta_0+\beta_1x_{1,t-h}+\dots+\beta_kx_{k,t-h}+\varepsilon_{t}$$
 
- * A different model for each forecast horizon $h$.
+* A different model for each forecast horizon $h$.
 
 ## Beer production
 
@@ -796,14 +797,14 @@ fit.consBest <- tslm(
   data = uschange)
 h <- 4
 newdata <- data.frame(
-    Income = c(1, 1, 1, 1),
-    Savings = c(0.5, 0.5, 0.5, 0.5),
-    Unemployment = c(0, 0, 0, 0))
+  Income = c(1, 1, 1, 1),
+  Savings = c(0.5, 0.5, 0.5, 0.5),
+  Unemployment = c(0, 0, 0, 0))
 fcast.up <- forecast(fit.consBest, newdata = newdata)
 newdata <- data.frame(
-    Income = rep(-1, h),
-    Savings = rep(-0.5, h),
-    Unemployment = rep(0, h))
+  Income = rep(-1, h),
+  Savings = rep(-0.5, h),
+  Unemployment = rep(0, h))
 fcast.down <- forecast(fit.consBest, newdata = newdata)
 ```
 
@@ -816,3 +817,602 @@ autoplot(uschange[, 1]) +
   autolayer(fcast.down, PI = TRUE, series = "decrease") +
   guides(colour = guide_legend(title = "Scenario"))
 ```
+
+## Exercises 
+
+## Exercise 
+
+Daily electricity demand for Victoria, Australia, during 2014 is contained in elecdaily. The data for the first 20 days can be obtained as follows.
+
+```{r}
+daily20 <- head(elecdaily,20)
+```
+
+Plot the data and find the regression model for Demand with temperature as an explanatory variable. Why is there a positive relationship?
+
+```{r}
+daily20 %>%
+  as.data.frame() %>%
+  ggplot(aes(x=Temperature, y=Demand)) +
+  ylab("Electricity Demand") +
+  xlab("Temperature") +
+  geom_point() +
+  geom_smooth(method="lm", se=FALSE)
+
+tslm_dem_temp <- tslm(Demand ~ Temperature, data = daily20)
+tslm_dem_temp
+```
+
+There is a positive relationship betweendemand with temperature. As temperature increased, people want to run air conditioner and fan and this increased the demand of electricity.
+
+Produce a residual plot. Is the model adequate? Are there any outliers or influential observations?
+
+```{r}
+checkresiduals(tslm_dem_temp$residuals)
+```
+
+This model is adequate because residuals aren't correlated (white noise) with each other and it roughly normally distributed.
+
+Use the model to forecast the electricity demand that you would expect for the next day if the maximum temperature was 15∘and compare it with the forecast if the with maximum temperature was 35∘. Do you believe these forecasts?
+
+```{r}
+fc_dem_temp <- forecast(tslm_dem_temp, 
+                        newdata=data.frame(Temperature=c(15,35)))
+fc_dem_temp
+```
+
+Give prediction intervals for your forecasts. The following R code will get you started:
+
+```{r}
+autoplot(daily20, facets=TRUE)
+daily20 %>%
+  as.data.frame() %>%
+  ggplot(aes(x=Temperature, y=Demand)) +
+  geom_point() +
+  geom_smooth(method="lm", se=FALSE)
+fit <- tslm(Demand ~ Temperature, data=daily20)
+checkresiduals(fit)
+forecast(fit, newdata=data.frame(Temperature=c(15,35)))
+```
+
+```{r}
+fc_dem_temp <- forecast(tslm_dem_temp, 
+                        newdata=data.frame(daily20)$Temperature)
+fc_dem_temp
+```
+
+Plot Demand vs Temperature for all of the available data in elecdaily. What does this say about your model?
+
+```{r}
+elecdaily %>%
+  as.data.frame() %>%
+  ggplot(aes(x=Temperature, y=Demand)) +
+  geom_point() +
+  geom_smooth(method="lm", se=FALSE)
+```
+
+The first model was made by few data points. The data of the first 20 days could be explained, but it wasn't right model for `elecdaily`.
+
+## Exercise 
+
+Data set `mens400` contains the winning times (in seconds) for the men’s 400 meters final in each Olympic Games from 1896 to 2016.
+
+Plot the winning time against the year. Describe the main features of the plot.
+
+```{r}
+autoplot(mens400)
+```
+Feature 1: Winning times in Olympic men's 400m track final has a decreasing trend.
+Feature 2: There are missing values.
+
+Fit a regression line to the data. Obviously the winning times have been decreasing, but at what average rate per year?
+
+```{r}
+time_mens400 <- time(mens400)
+tslm_mens400 <- tslm(mens400 ~ time_mens400, data = mens400)
+tslm_mens400
+```
+
+```{r}
+autoplot(mens400) +
+  geom_abline(slope = tslm_mens400$coefficients[2],
+              intercept = tslm_mens400$coefficients[1],
+              colour = "red")
+
+mens400_df <- data.frame(Y=as.matrix(mens400), date=time(mens400)) 
+
+mens400_df %>%
+  ggplot(aes(x=date, y=Y)) +
+  geom_point() +
+  geom_smooth(method="lm", se=FALSE) +
+  ggtitle("Winning times in Olympic men's 400m track final",
+          subtitle = "1896-2016") +
+  ylab("Seconds") + xlab("Year")
+```
+
+Plot the residuals against the year. What does this indicate about the suitability of the fitted line?
+
+```{r}
+mens400_df$residuals <- tslm_mens400$residuals
+mens400_df <- data.frame(Y=as.matrix(mens400), date=time(mens400))
+mens400_df$fitted <- predict(tslm_mens400, newdata=data.frame(mens400_df$date))
+
+
+mens400_df %>%
+  ggplot() +
+  geom_point(aes(x=date, y=Y)) +
+  geom_point(aes(x=date, y=fitted), color = "red") +
+  ggtitle("Winning times in Olympic men's 400m track final Residuals",
+          subtitle = "1896-2016") +
+  ylab("Seconds") + xlab("Year")
+
+checkresiduals(tslm_mens400)
+```
+
+The model residuals are not normally distributed.
+
+The winning times have been decreasing at average rate of `r round(abs(tslm_mens400$coefficients[2]), 5)` seconds per year.
+
+Predict the winning time for the men’s 400 meters final in the 2020 Olympics. Give a prediction interval for your forecasts. What assumptions have you made in these calculations?
+
+```{r}
+fc_mens400 <- forecast(tslm_mens400, 
+                       newdata=data.frame(time_mens400 = 2020))
+fc_mens400
+```
+
+```{r}
+autoplot(mens400) +
+  autolayer(fc_mens400, PI = TRUE)
+```
+
+## Exercise 
+
+Type `easter(ausbeer)` and interpret what you see.
+
+```{r}
+easter(ausbeer)
+```
+
+Data: Quarterly Australian beer production data. There are 218 data points.
+Start is 1st quarter of 1956 and the last is the 2nd quarter of 2010.
+`easter` function returns a vector of 0's or 1's or fractional parts in the observed time period. If full Easter holidays are in a time period, it returns 1, and returns 0 if there isn't any. If the holidays are extended from a period to the other, easter function returns fractional portions to each of them.
+
+## Exercise 
+
+The data set fancy concerns the monthly sales figures of a shop which opened in January 1987 and sells gifts, souvenirs, and novelties. The shop is situated on the wharf at a beach resort town in Queensland, Australia. The sales volume varies with the seasonal population of tourists. There is a large influx of visitors to the town at Christmas and for the local surfing festival, held every March since 1988. Over time, the shop has expanded its premises, range of products, and staff.
+
+Produce a time plot of the data and describe the patterns in the graph. Identify any unusual or unexpected fluctuations in the time series.
+
+Monthly sales for a souvenir shop on the wharf at a beach resort town in Queensland, Australia.
+
+```{r}
+autoplot(fancy) +
+  ggtitle("Monthly Sales for a souvenir shop") +
+  xlab("Year") + ylab("Australia Dollars") 
+```
+
+- seasonal variations increased exponentially
+
+Explain why it is necessary to take logarithms of these data before fitting a model.
+
+The size of the seasonal variations should be roughly the same across the whole series to be fitted well to a model. Fancy data shows that seasonal variations increased exponentially. It is necessary to take logarithms of the data.
+
+Use R to fit a regression model to the logarithms of these sales data with a linear trend, seasonal dummies and a “surfing festival” dummy variable.
+
+```{r}
+fancy_log <- log(fancy)
+autoplot(fancy_log) +
+  ggtitle("Monthly Sales for a souvenir shop") +
+  xlab("Year") + ylab("Australia Dollars (log)") 
+```
+
+Plot the residuals against time and against the fitted values. Do these plots reveal any problems with the model?
+
+```{r}
+time_fancy_log <- time(fancy_log)
+tslm_fancy_log <- tslm(fancy_log ~ time_fancy_log, data = time_fancy_log)
+tslm_fancy_log
+```
+
+```{r}
+autoplot(fancy_log) +
+  geom_abline(slope = tslm_fancy_log$coefficients[2],
+              intercept = tslm_fancy_log$coefficients[1],
+              colour = "red")
+
+fancy_log_df <- data.frame(Y=as.matrix(fancy_log), date=time(fancy_log), month=month.abb[cycle(fancy_log)]) 
+
+fancy_log_df %>%
+  ggplot(aes(x=date, y=Y)) +
+  geom_point() +
+  geom_smooth(method="lm", se=FALSE) +
+  ggtitle("Monthly Sales for a souvenir shop") +
+  xlab("Year") + ylab("Australia Dollars (log)") 
+```
+
+Plot the residuals against the year. What does this indicate about the suitability of the fitted line?
+
+```{r}
+fancy_log_df$residuals <- tslm_fancy_log$residuals
+fancy_log_df$fitted <- predict(tslm_fancy_log, newdata=data.frame(fancy_log_df$date))
+
+
+autoplot(fancy_log, series="Data") +
+  autolayer(fitted(tslm_fancy_log), series="Fitted") +
+  ggtitle("Monthly Sales for a souvenir shop") +
+  xlab("Year") + ylab("Australia Dollars (log)") 
+guides(colour=guide_legend(title=" "))
+
+checkresiduals(tslm_fancy_log)
+```
+
+The size of the residuals changed as we move along the x-axis(fitted values). Even after log transformation, there are still heteroscedacity in the errors or that the variance of the residuals are not constant. 
+
+Do boxplots of the residuals for each month. Does this reveal any problems with the model?
+
+```{r}
+fancy_log_df %>%
+  ggplot() +
+  geom_boxplot(aes(y = residuals, x = month))
+
+ggsubseriesplot(tslm_fancy_log$residuals)
+ggsubseriesplot(tslm_fancy_log$residuals)
+```
+
+Residuals are highest in December. The residuals have pattern so it means that there is correlation between residuals and time.
+
+The distribution of the residuals is unsymetrical for some months. For some months, the mean of the residuals wasn't 0 (residuals' mean should be 0 for all months because getting the minimum SSE means getting mean). Residuals with such properties can't have normal distribution, which will make it difficult to get prediction interval.
+
+What do the values of the coefficients tell you about each variable?
+
+```{r}
+tslm_fancy_log$coefficients
+```
+
+# The model has positive trend. It means that as time goes on, the sales amount generally increases. 
+# And all seasonal variables are positive. It means that the sales amount was minimum on January and the sales of the other months were greater than January for most of years. 
+# Finally, surfing_festival variable's coefficient is 0.501 and it isn't small compared to the others. It means that there were increased sales in Marchs when surfing festival happened.
+
+What does the Breusch-Godfrey test tell you about your model?
+
+```{r}
+checkresiduals(tslm_fancy_log)
+```
+
+The p value of the test is less than 0.05 which means that the residuals can be distinguished from white noise. The residuals apper to be correlated with each other.
+
+Regardless of your answers to the above questions, use your regression model to predict the monthly sales for 1994, 1995, and 1996. Produce prediction intervals for each of your forecasts.
+
+```{r}
+future_fancy <- rep(0, 36)
+
+# make future data as time series.
+future_fancy <- ts(data = future_fancy,
+                   start = 1994,
+                   end = c(1996, 12),
+                   frequency = 12)
+
+# forecast
+fc_tslm_log_fancy <- forecast(
+  tslm_fancy_log,
+  newdata = data.frame(time_fancy_log = time(future_fancy))
+)
+
+# plot the forecast
+autoplot(fc_tslm_log_fancy)
+```
+
+Transform your predictions and intervals to obtain predictions and intervals for the raw data.
+
+```{r}
+fc_tslm_log_fancy
+```
+
+How could you improve these predictions by modifying the model?
+
+```{r}
+future_fancy <- rep(0, 36)
+
+tslm_fancy_log <- tslm(BoxCox(fancy, 0) ~ trend + season)
+
+
+
+# make future data as time series.
+future_fancy <- ts(data = future_fancy,
+                   start = 1994,
+                   end = c(1996, 12),
+                   frequency = 12)
+
+# forecast
+fc_tslm_log_fancy <- forecast(
+  tslm_fancy_log,
+  newdata = data.frame(time_fancy_log = time(future_fancy))
+)
+
+# plot the forecast
+autoplot(fc_tslm_log_fancy)
+
+checkresiduals(fc_tslm_log_fancy)
+```
+
+## Exercise
+
+The gasoline series consists of weekly data for supplies of US finished motor gasoline product, from 2 February 1991 to 20 January 2017. The units are in “million barrels per day”. Consider only the data to the end of 2004.
+
+Fit a harmonic regression with trend to the data. Experiment with changing the number Fourier terms.
+
+```{r}
+gasoline_until_2004 <- window(gasoline, end = 2005)
+autoplot(gasoline_until_2004, xlab = "Year") +
+  ggtitle("US finished motor gasoline product supplied") +
+  xlab("Year") + ylab("million barrels per day") 
+```
+
+```{r}
+# make tslm model
+for(num in c(1, 2, 3, 5, 10, 20)){
+  #make variable names for each model using pair number.
+  var_name <- paste("tslm_ft",
+                    as.character(num),
+                    "_gasoline_until_2004",
+                    sep = "")
+  
+  #assign ts linear model to each variable name.
+  assign(var_name,
+         tslm(gasoline_until_2004 ~ trend + fourier(
+           gasoline_until_2004,
+           K = num
+         ))
+  )
+  
+  #plot the data and fitted values
+  print(
+    autoplot(gasoline_until_2004) +
+      autolayer(get(var_name)$fitted.values,
+                series = as.character(num)) +
+      ggtitle(var_name) +
+      ylab("gasoline") +
+      guides(colour = guide_legend(title = "Number of Fourier Transform pairs"))
+  )
+}
+```
+
+Plot the observed gasoline and fitted values and comment on what you see.
+
+```{r}
+autoplot(gasoline_until_2004) +
+  autolayer(tslm_ft1_gasoline_until_2004$fitted.values, series = "1") +
+  autolayer(tslm_ft5_gasoline_until_2004$fitted.values, series = "2") +
+  autolayer(tslm_ft10_gasoline_until_2004$fitted.values, series = "3") +
+  autolayer(tslm_ft10_gasoline_until_2004$fitted.values, series = "5") +
+  autolayer(tslm_ft20_gasoline_until_2004$fitted.values, series = "10") +
+  autolayer(tslm_ft20_gasoline_until_2004$fitted.values, series = "20") +
+  guides(colour = guide_legend(title = "Fourier Transform pairs")) +
+  scale_color_discrete(breaks = c(1, 2, 3, 5, 10, 20))
+```
+
+As more number of Fourier pairs used, the fitted line looks more like the original data. The fitted lines do not follow the trend well.
+
+Select the appropriate number of Fourier terms to include by minimising the AICc or CV value.
+
+```{r}
+for(i in c(1, 2, 3, 5, 10, 20)){
+  tslm_ft_gasoline_until_2004.name <- paste(
+    "tslm_ft", as.character(i), "_gasoline_until_2004",
+    sep = ""
+  )
+  writeLines(
+    paste(
+      "\n", tslm_ft_gasoline_until_2004.name, "\n"
+    )
+  )
+  print(CV(get(tslm_ft_gasoline_until_2004.name)))
+}
+```
+
+In the above K values (1, 2, 3, 5, 10, 20), k = 10 minimized the AICc and CV value.
+
+```{r}
+# Get exact number of Fourier pairs to minimize AICc or CV
+min_AICc <- Inf
+min_K_by_AICc <- 0
+min_CV <- Inf
+min_K_by_CV <- 0
+AICc_K <- 0
+CV_K <- 0
+
+# maximum number of pairs is 26 because the frequency of gasoline data is about 52.18
+for(num in 1:26){
+  AICc_K <- CV(
+    tslm(
+      gasoline_until_2004 ~ trend + fourier(gasoline_until_2004, K = num)
+    )
+  )[["AICc"]]
+  CV_K <- CV(
+    tslm(
+      gasoline_until_2004 ~ trend + fourier(gasoline_until_2004, K = num)
+    )
+  )[["CV"]]
+  
+  # If the minimum AICc and CV values are found, the loop don't need to run anymore. Therefore print the result number of pairs and break the loop.
+  # If num = 1, don't run below codes and move to num = 2. With just the result of num = 1, I cannot know whether the AICc and CV values are minimum.
+  if(num != 1){
+    if(AICc_K >= min_AICc & CV_K >= min_CV){
+      writeLines(
+        paste("The number of Fourier Transform pairs to minimize AICc:",
+              as.character(min_K_by_AICc)
+        )
+      )
+      writeLines(
+        paste("The number of Fourier Transform pairs to minimize CV:",
+              as.character(min_K_by_CV)
+        )
+      )
+      break
+    }
+  }
+  
+  # find the minimum AICc and CV and the number of pairs at the state.
+  if(AICc_K < min_AICc){
+    min_AICc <- AICc_K
+    min_K_by_AICc <- num
+  }
+  if(CV_K < min_CV){
+    min_CV <- CV_K
+    min_K_by_CV <- num
+  }
+}
+# To get minimum AICc or CV, I need 7 pairs.
+```
+
+Check the residuals of the final model using the checkresiduals() function. Even though the residuals fail the correlation tests, the results are probably not severe enough to make much difference to the forecasts and prediction intervals. (Note that the correlations are relatively small, even though they are significant.)
+
+```{r}
+tslm_ft7_gasoline_until_2004 <- tslm(
+  gasoline_until_2004 ~ trend + fourier(
+    gasoline_until_2004, 
+    K = 7
+  )
+)
+
+checkresiduals(tslm_ft7_gasoline_until_2004)
+```
+
+To forecast using harmonic regression, you will need to generate the future values of the Fourier terms. This can be done as follows.
+
+```{r eval=FALSE}
+fc <- forecast(fit, newdata=data.frame(fourier(x,K,h)))
+```
+
+where fit is the fitted model using tslm(), K is the number of Fourier terms used in creating fit, and h is the forecast horizon required.
+
+Forecast the next year of data.
+
+```{r}
+fc_gasoline_2005 <- forecast(
+  tslm_ft7_gasoline_until_2004,
+  newdata=data.frame(fourier(
+    gasoline_until_2004, K = 7, h = 52)
+  )
+)
+```
+
+Plot the forecasts along with the actual data for 2005. What do you find?
+
+```{r}
+autoplot(fc_gasoline_2005) +
+  autolayer(window(
+    gasoline,
+    start = 2004,
+    end = 2006
+  )
+  ) +
+  scale_x_continuous(limits = c(2004, 2006))
+```
+
+The majority of actual data fits within the 80% prediction interval. The model couldn't predict the sudden fall in the fall as the drop was a lot bigger than expected (outside teh 95% interval).
+
+## Exercise 
+
+Data set `huron` gives the water level of Lake Huron in feet from 1875 to 1972.
+
+Plot the data and comment on its features.
+
+```{r}
+autoplot(huron , xlab = "Year") +
+  ggtitle("Level of Lake Huron") +
+  xlab("Year") + ylab("feet (reduced by 570 feet)") 
+```
+
+Fit a linear regression and compare this to a piecewise linear trend model with a knot at 1915.
+
+```{r}
+h <- 8
+# simple linear regression
+tslm_huron <- tslm(huron ~ trend)
+fc_tslm_huron <- forecast(tslm_huron, h=h)
+
+# simple linear regression with log transformation
+tslm_log_huron <- tslm(huron ~ trend, lambda = 0)
+fc_tslm_log_huron <- forecast(tslm_log_huron, h=h)
+
+# exponential regression
+tslm_exp_huron <- tslm(huron ~ trend, lambda = 0)
+fc_tslm_exp_huron <- forecast(tslm_exp_huron, h = h)
+
+# piecewise linear regression
+t <- time(huron)
+t.break <- 1915
+t_piece <- ts(pmax(0,t-t.break), start=1875)
+
+tslm_pw_huron <- tslm(huron ~ t + t_piece)
+t_new <- t[length(t)]+seq(h)
+t_piece_new <- t_piece[length(t_piece)]+seq(h)
+
+newdata <- cbind(t=t_new,
+                 t_piece=t_piece_new) %>%
+  as.data.frame()
+
+fc_tslm_pw_huron <- forecast(
+  tslm_pw_huron,
+  newdata = newdata
+)
+
+# cubic spline regression
+tslm_spline_huron <- splinef(huron, lambda = 0)
+fc_tslm_spline_huron <- forecast(
+  tslm_spline_huron,
+  newdata = newdata
+)
+
+# plot the results
+autoplot(huron) +
+  autolayer(fitted(tslm_huron), series = "Linear") +
+  autolayer(fitted(tslm_log_huron), series="Logarithm") +
+  autolayer(fitted(fc_tslm_exp_huron), series="Exponential") +
+  autolayer(fitted(tslm_pw_huron), series = "Piecewise") +
+  autolayer(fitted(tslm_spline_huron), series = "Cubic Spline") +
+  autolayer(fc_tslm_pw_huron, series="Piecewise") +
+  autolayer(fc_tslm_huron$mean, series = "Linear") +
+  autolayer(fc_tslm_log_huron$mean, series="Logarithm") +
+  autolayer(fc_tslm_exp_huron$mean, series="Exponential") +
+  autolayer(fc_tslm_spline_huron$mean, series="Cubic Spline") +
+  xlab("Year") +  ylab("Water level") +
+  ggtitle("Lake Huron water level change") +
+  guides(colour=guide_legend(title=" "))
+
+
+```
+
+Cubic spline model did catch the trend well. Linear model, exponential model and log transformed linear model did not catch the trend well at 1915.
+ 
+Generate forecasts from these two models for the period up to 1980 and comment on these.
+
+```{r}
+autoplot(huron) +
+  autolayer(fitted(tslm_huron), series = "Linear") +
+  autolayer(fc_tslm_huron, series = "Linear") +
+  xlab("Year") +  ylab("Water level") +
+  ggtitle("Lake Huron water level change",
+          subtitle = "Linear Regression model") +
+  guides(colour=guide_legend(title=" ")) +
+  theme(plot.title = element_text(hjust = 0.5),
+        plot.subtitle = element_text(hjust = 0.5))
+
+autoplot(huron) +
+  autolayer(fitted(tslm_pw_huron), series = "Piecewise") +
+  autolayer(fc_tslm_pw_huron, series="Piecewise") +
+  xlab("Year") +  ylab("Water level") +
+  ggtitle("Lake Huron water level change",
+          subtitle = "Piecewise linear model") +
+  guides(colour=guide_legend(title=" ")) +
+  theme(plot.title = element_text(hjust = 0.5),
+        plot.subtitle = element_text(hjust = 0.5))
+
+checkresiduals(tslm_huron)
+checkresiduals(tslm_pw_huron)
+```
+
+Linear regression model shows that the point forecasts and the upper and the lower bounds of prediction intervals decrease as time goes on. This model did not reflect the trend change around the year 1915.
+Piecewise linear regression model shows that the point forecasts and the prediction intervals are almost same over time. This model reflected the trend change.

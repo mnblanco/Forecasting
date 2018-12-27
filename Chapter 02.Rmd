@@ -1,7 +1,6 @@
 ---
 title: "Applied forecasting for business and economics"
 author: "Ch2. Time series graphics"
-date: "12/26/2018"
 output: html_document
 ---
 
@@ -727,8 +726,6 @@ Use the help function to explore what the series gold, woolyrnq and gas represen
 autoplot(gold)
 ```
 
-## 
-
 Period: Daily
 Trending downard
 
@@ -747,8 +744,6 @@ which.max(gold)
 autoplot(woolyrnq)
 ```
 
-## 
-
 Period: Quarterly
 Trending downard, Seasonal
 
@@ -766,8 +761,6 @@ which.max(woolyrnq)
 ```{r, echo=FALSE}
 autoplot(gas)
 ```
-
-## 
 
 Period: Monthly
 Trending upward, Seasonal
@@ -792,7 +785,6 @@ tute1 <- read.csv("data/tute1.csv", header=TRUE)
 mytimeseries <- ts(tute1[,-1], start=1981, frequency=4)
 ```
 
-## 
 - Construct time series plots of each of the three series
 ```{r, echo=FALSE}
 autoplot(mytimeseries, facets=TRUE)
@@ -801,10 +793,13 @@ autoplot(mytimeseries, facets=TRUE)
 ## Exercises 3
 
 - Read the data into R
+
 ```{r}
 retaildata <- readxl::read_excel("data/retail.xlsx", skip=1)
 ```
+
 - Select one of the time series
+
 ```{r}
 myts <- ts(retaildata[,"A3349873A"], frequency=12, start=c(1982,4))
 ```
@@ -816,25 +811,17 @@ myts <- ts(retaildata[,"A3349873A"], frequency=12, start=c(1982,4))
 autoplot(myts)
 ```
 
-##
-
 ```{r, echo=FALSE}
 ggseasonplot(myts)
 ```
-
-##
 
 ```{r, echo=FALSE}
 ggsubseriesplot(myts)
 ```
 
-##
-
 ```{r, echo=FALSE}
 gglagplot(myts)
 ```
-
-##
 
 Peaks are every 12 periods apart and tend are 6 periods apart
 
