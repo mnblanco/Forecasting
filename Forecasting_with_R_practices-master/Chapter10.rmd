@@ -1,0 +1,350 @@
+# Chapter 10
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, Load_packages}
+
+library(fpp2)
+library(hts)
+
+```
+
+1. Write out the S matrices for the Australian tourism hierarchy and the Australian prison grouped structure. Use the smatrix command to verify your answers.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, Question1}
+
+# Australian tourism visitor nights data
+# - used development version of fpp package to use visnight data(2018/2/22). Run below 3 rows of codes without #s to download it.
+# install.packages("devtools")
+# library(devtools)
+# devtools::install_github("robjhyndman/fpp")
+str(visnights)
+head(visnights)
+
+# make a hierachical time series using visnights time series matrix.
+# I'm going to aggregate data using the position of characters. The first three characters of each column name of visnights will be the categories at the first level of the hierarchy (States). The following five characters will be the bottom-level categories (Zones).
+tourism.hts <- hts(visnights, characters = c(3, 5))
+str(tourism.hts)
+# There are 3 levels. And there are 6 nodes for level 1 and 20 nodes for level 2. It means that the summing matrix S is 27 x 20 matrix.
+# S = 
+# |1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1| <- level 0
+# |1 1 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0| <- row 2-7
+# |0 0 0 0 0 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0|   (level 1)
+# |0 0 0 0 0 0 0 1 1 1 0 0 0 0 0 0 0 0 0 0|
+# |0 0 0 0 0 0 0 0 0 0 1 1 1 0 0 0 0 0 0 0|
+# |0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 1 0 0 0|
+# |0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1|
+# |1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0| <- row 8-27
+# |0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0|   (level 2)
+# |0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0|
+# |0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0|
+# |0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0|
+# |0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0|
+# |0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0|
+# |0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0|
+# |0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0|
+# |0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0|
+# |0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0|
+# |0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0|
+# |0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0|
+# |0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0|
+# |0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0|
+# |0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0|
+# |0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0|
+# |0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0|
+# |0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0|
+# |0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1|
+
+# calculate S matrix using smatrix function.
+smatrix(tourism.hts)
+
+# Australian prisoner numbers data
+str(prison)
+head(prison)
+
+# make a grouped time series using prison time series matrix. It will be a grouped time series, not hierarchical time series. It is because the gender and the legal status are different attributes. They make them different hierarchies, but need to be combined at the top level.
+# I'm going to aggregate data using the position of characters again. The first three characters of each column name of prison will be the categories states categories. The 4th character will be the gender categories, and the following 9 characters will be the legal status categories.
+prison.gts <- gts(prison, characters = c(3, 1, 9))
+str(prison.gts)
+
+# There are 3 levels. And there are 32 nodes for level 2(bottom-level). G1, G2, G3, G4, G5, G6 are level 1 and there are 48 nodes. It means that the summing matrix S is 81 x 32 matrix.
+# S = 
+# | 1111 1111 1111 1111 1111 1111 1111 1111 | <- level 0
+# | 1111 0000 0000 0000 0000 0000 0000 0000 | <- level 1
+# | 0000 1111 0000 0000 0000 0000 0000 0000 |    (G1)
+# | 0000 0000 1111 0000 0000 0000 0000 0000 |
+# | 0000 0000 0000 1111 0000 0000 0000 0000 |
+# | 0000 0000 0000 0000 1111 0000 0000 0000 |
+# | 0000 0000 0000 0000 0000 1111 0000 0000 |
+# | 0000 0000 0000 0000 0000 0000 1111 0000 |
+# | 0000 0000 0000 0000 0000 0000 0000 1111 |
+# | 1100 1100 1100 1100 1100 1100 1100 1100 | <- level 1
+# | 0011 0011 0011 0011 0011 0011 0011 0011 |    (G2)
+# | 1010 1010 1010 1010 1010 1010 1010 1010 | <- level 1
+# | 0101 0101 0101 0101 0101 0101 0101 0101 |    (G3)
+# | 1100 0000 0000 0000 0000 0000 0000 0000 | <- level 1
+# | 0011 0000 0000 0000 0000 0000 0000 0000 |    (G4)
+# | 0000 1100 0000 0000 0000 0000 0000 0000 |
+# | 0000 0011 0000 0000 0000 0000 0000 0000 |
+# | 0000 0000 1100 0000 0000 0000 0000 0000 |
+# | 0000 0000 0011 0000 0000 0000 0000 0000 |
+# | 0000 0000 0000 1100 0000 0000 0000 0000 |
+# | 0000 0000 0000 0011 0000 0000 0000 0000 |
+# | 0000 0000 0000 0000 1100 0000 0000 0000 |
+# | 0000 0000 0000 0000 0011 0000 0000 0000 |
+# | 0000 0000 0000 0000 0000 1100 0000 0000 |
+# | 0000 0000 0000 0000 0000 0011 0000 0000 |
+# | 0000 0000 0000 0000 0000 0000 1100 0000 |
+# | 0000 0000 0000 0000 0000 0000 0011 0000 |
+# | 0000 0000 0000 0000 0000 0000 0000 1100 |
+# | 0000 0000 0000 0000 0000 0000 0000 0011 |
+# | 1010 0000 0000 0000 0000 0000 0000 0000 | <- level 1
+# | 0101 0000 0000 0000 0000 0000 0000 0000 |    (G5)
+# | 0000 1010 0000 0000 0000 0000 0000 0000 |
+# | 0000 0101 0000 0000 0000 0000 0000 0000 |
+# | 0000 0000 1010 0000 0000 0000 0000 0000 |
+# | 0000 0000 0101 0000 0000 0000 0000 0000 |
+# | 0000 0000 0000 1010 0000 0000 0000 0000 |
+# | 0000 0000 0000 0101 0000 0000 0000 0000 |
+# | 0000 0000 0000 0000 1010 0000 0000 0000 |
+# | 0000 0000 0000 0000 0101 0000 0000 0000 |
+# | 0000 0000 0000 0000 0000 1010 0000 0000 |
+# | 0000 0000 0000 0000 0000 0101 0000 0000 |
+# | 0000 0000 0000 0000 0000 0000 1010 0000 |
+# | 0000 0000 0000 0000 0000 0000 0101 0000 |
+# | 0000 0000 0000 0000 0000 0000 0000 1010 |
+# | 0000 0000 0000 0000 0000 0000 0000 0101 |
+# | 1000 1000 1000 1000 1000 1000 1000 1000 | <- level 1
+# | 0100 0100 0100 0100 0100 0100 0100 0100 |    (G6)
+# | 0010 0010 0010 0010 0010 0010 0010 0010 |
+# | 0001 0001 0001 0001 0001 0001 0001 0001 |
+# | 1000 0000 0000 0000 0000 0000 0000 0000 | <- level 2
+# | 0100 0000 0000 0000 0000 0000 0000 0000 |
+# | 0010 0000 0000 0000 0000 0000 0000 0000 |
+# | 0001 0000 0000 0000 0000 0000 0000 0000 |
+# | 0000 1000 0000 0000 0000 0000 0000 0000 |
+# | 0000 0100 0000 0000 0000 0000 0000 0000 |
+# | 0000 0010 0000 0000 0000 0000 0000 0000 |
+# | 0000 0001 0000 0000 0000 0000 0000 0000 |
+# | 0000 0000 1000 0000 0000 0000 0000 0000 |
+# | 0000 0000 0100 0000 0000 0000 0000 0000 |
+# | 0000 0000 0010 0000 0000 0000 0000 0000 |
+# | 0000 0000 0001 0000 0000 0000 0000 0000 |
+# | 0000 0000 0000 1000 0000 0000 0000 0000 |
+# | 0000 0000 0000 0100 0000 0000 0000 0000 |
+# | 0000 0000 0000 0010 0000 0000 0000 0000 |
+# | 0000 0000 0000 0001 0000 0000 0000 0000 |
+# | 0000 0000 0000 0000 1000 0000 0000 0000 |
+# | 0000 0000 0000 0000 0100 0000 0000 0000 |
+# | 0000 0000 0000 0000 0010 0000 0000 0000 |
+# | 0000 0000 0000 0000 0001 0000 0000 0000 |
+# | 0000 0000 0000 0000 0000 1000 0000 0000 |
+# | 0000 0000 0000 0000 0000 0100 0000 0000 |
+# | 0000 0000 0000 0000 0000 0010 0000 0000 |
+# | 0000 0000 0000 0000 0000 0001 0000 0000 |
+# | 0000 0000 0000 0000 0000 0000 1000 0000 |
+# | 0000 0000 0000 0000 0000 0000 0100 0000 |
+# | 0000 0000 0000 0000 0000 0000 0010 0000 |
+# | 0000 0000 0000 0000 0000 0000 0001 0000 |
+# | 0000 0000 0000 0000 0000 0000 0000 1000 |
+# | 0000 0000 0000 0000 0000 0000 0000 0100 |
+# | 0000 0000 0000 0000 0000 0000 0000 0010 |
+# | 0000 0000 0000 0000 0000 0000 0000 0001 |
+
+# calculate S matrix using smatrix function.
+smatrix(prison.gts)
+
+```
+
+
+3. Generate 8-step-ahead bottom-up forecasts using ARIMA models for the visnights Australian domestic tourism data. Plot the coherent forecasts by level and comment on their nature. Are you satisfied with these forecasts?
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, Question3}
+
+# Forecast
+fc_visnights_arima <- forecast(
+  tourism.hts, h = 8, method = "bu", fmethod = "arima"
+)
+
+# Plot the coherent forecasts by level.
+plot(fc_visnights_arima, levels = 0, color_lab = TRUE)
+title(main = "Total visitor nights")
+# show strong seasonality.
+
+plot(fc_visnights_arima, levels = 1, color_lab = TRUE)
+title(main = "Grouped by State")
+# On average, the number of visitors to New South Wales were biggest. However, in 3rd quarters, the number of visitors to Queensland were bigger than the one for NSW.
+# The number of visitors to NSW, VIC, WAU show strong seasonality, but the numbers of WAU and Other had weaker seasonality. 
+
+# level 2 coherent forecasts are equal to the base forecasts.
+plot(fc_visnights_arima, levels = 2, color_lab = TRUE)
+title(main = "Grouped by Zone in each state")
+# The number of visitors to Queensland Metro area were the biggest at all times.
+
+# I'm satisfied with the forecasts.
+
+```
+
+4. Model the aggregate series for Australian domestic tourism data visnights using an ARIMA model. Comment on the model. Generate and plot 8-step-ahead forecasts from the ARIMA model and compare these with the bottom-up forecasts generated in question 3 for the aggregate level.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, Question4}
+str(visnights)
+head(visnights)
+
+# aggregate visnights time series matrix.
+visnights_total <- rowSums(visnights)
+visnights_total.ts <- ts(visnights_total, 
+                         start = 1998, 
+                         frequency = 4)
+str(visnights_total.ts)
+
+# model the aggregated data using ARIMA model and forecast.
+visnights_total_autoarima <- auto.arima(
+  visnights_total.ts
+)
+
+autoplot(visnights_total.ts) +
+  autolayer(visnights_total_autoarima$fitted)
+# It looked like the model didn't fit well to the aggregated data.
+
+fc_visnights_total_autoarima <- forecast(
+  visnights_total_autoarima, h = 8
+)
+
+fc_visnights_total_autoarima$model
+# ARIMA(0, 1, 1)(0, 1, 1)[4] model was chosen.
+
+# get ts object of bottom-up forecasts.
+visnights_total_bu.ts <- ts(
+  rowSums(fc_visnights_arima$bts), 
+  start = 2017, 
+  frequency = 4)
+
+autoplot(fc_visnights_total_autoarima) +
+  autolayer(visnights_total_bu.ts)
+# The forecasts have increasing trend with strong seasonality. Bottom-up forecasts had non-increasing trend that the values were lower. Whether the lower level data are considered made such difference in forecasting.
+
+```
+
+5. Generate 8-step-ahead optimally reconciled coherent forecasts using ARIMA base forecasts for the visnights Australian domestic tourism data. Plot the coherent forecasts by level and comment on their nature. How and why are these different to the bottom-up forecasts generated in question 3 above.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, Question5}
+
+# I want to do optimally reconciled coherent forecasts using MinT estimator. I need to decide (base forecast) covariance model for the estimator.
+str(visnights)
+str(smatrix(tourism.hts))
+# The number of time points(T) is 76 and the number of rows(m) in S matrix is 27. T >= m. Therefore I'm going to use sample covariance.
+
+# forecast
+fc_visnights_arima_opt <- forecast(
+  tourism.hts, h = 8,
+  method = "comb", weights = "mint", covariance = "sam",
+  fmethod = "arima"
+)
+
+# Plot the coherent forecasts by level.
+plot(fc_visnights_arima_opt, levels = 0, col = "red")
+par(new = TRUE, xpd = TRUE)
+plot(fc_visnights_arima, levels = 0, col = "blue")
+title(main = "Total number of visitors")
+legend("bottomright", legend = c("Optimal", "Bottom-up"), title = "Coherent forecast", col = c("red", "blue"), lty = c(1, 1), bty = "n", cex = 0.5)
+# Top level coherent forecasts show that the optimally reconciled method yielded higher forecast values than the bottom-up method. But the values aren't bigger than the forecasts of aggregated data's ARIMA model.
+# It happened because the top level forecasts of aggregated data's ARIMA model affected the optimal values smaller while the aggregated value from bottom-level forecasts affected the values bigger.
+
+plot(fc_visnights_arima_opt, levels = 1, color_lab = TRUE)
+plot(fc_visnights_arima, levels = 1, color_lab = TRUE)
+# Level 1 coherent forecasts show that the optimally reconciled method yielded higher forecast values especially for peaks than the bottom-up method.
+# It looked like the top-level forecasts affected more than the bottom-level forecasts especially to the seasonal peak forecast values.
+
+plot(fc_visnights_arima_opt, levels = 2, color_lab = TRUE)
+plot(fc_visnights_arima, levels = 2, color_lab = TRUE)
+# For some categories, the forecasts became bigger when optimally reconciled method was used while for the others, the forecasts became smaller.
+# The increase and decrease were different by each category because of the affiliation differences.
+
+```
+
+6. Define as a test-set the last two years of the visnights Australian domestic tourism data. Generate, bottom-up, top-down and optimally reconciled forecasts for this period and compare their forecasts accuracy.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, Question6}
+
+tourism.hts.train <- window(tourism.hts, end=c(2014,4))
+tourism.hts.test <- window(tourism.hts, start=2015)
+
+fc_visnights_ets_opt = forecast(
+  tourism.hts.train, h = 8, 
+  method = "comb", weights = "wls", fmethod = "ets"
+  )
+fc_visnights_ets_bu = forecast(
+  tourism.hts.train, h = 8, 
+  method = "bu", fmethod = "ets"
+  )
+
+tab <- matrix(NA, ncol = 4, nrow = 4)
+rownames(tab) <- c("Total", "State", "Bottom", "All series")
+colnames(tab) <- c("Bottom-up MAPE", "Bottom-up MASE", "Optimal MAPE", "Optimal MASE")
+# I'll use MAPE and MASE as evaluation method.
+
+tab[1,] <- c(
+  accuracy.gts(
+    fc_visnights_ets_bu,
+    tourism.hts.test,
+    levels = 0
+    )[c("MAPE","MASE"),"Total"],
+  accuracy.gts(
+    fc_visnights_ets_opt, 
+    tourism.hts.test,
+    levels = 0
+    )[c("MAPE","MASE"),"Total"]
+  )
+
+j=2
+for(i in c(1:2)){
+  tab[j,] <- c(
+    mean(accuracy.gts(
+      fc_visnights_ets_bu,
+      tourism.hts.test,
+      levels = i)["MAPE",]),
+    mean(accuracy.gts(
+      fc_visnights_ets_bu,
+      tourism.hts.test,
+      levels = i)["MASE",]),
+    mean(accuracy.gts(
+      fc_visnights_ets_opt,
+      tourism.hts.test,
+      levels = i)["MAPE",]),
+    mean(accuracy.gts(
+      fc_visnights_ets_opt,
+      tourism.hts.test,
+      levels = i)["MASE",])
+  )
+  j=j+1
+}
+
+tab[4,] <- c(
+  mean(accuracy.gts(
+      fc_visnights_ets_bu,
+      tourism.hts.test
+      )["MAPE",]),
+  mean(accuracy.gts(
+      fc_visnights_ets_bu,
+      tourism.hts.test
+      )["MASE",]),
+  mean(accuracy.gts(
+      fc_visnights_ets_opt,
+      tourism.hts.test
+      )["MAPE",]),
+  mean(accuracy.gts(
+      fc_visnights_ets_opt,
+      tourism.hts.test
+      )["MASE",])
+)
+
+knitr::kable(tab, digits=2, booktabs=TRUE)
+# all evaluation results show that forecasts of optiamlly reconciled method were more accurate than the bottom-up forecasts.
+
+plot(fc_visnights_ets_opt, levels = 0)
+plot(fc_visnights_ets_bu, levels = 0)
+plot(tourism.hts, level = 0)
+# can't see increasing trend in the forecasts of optimally reconciled method and the bottom-up forecasts. Bottom-up forecasts are lowest.
+
+```
+
+### Question 2 isn't related with coding that I didn't include it in here.

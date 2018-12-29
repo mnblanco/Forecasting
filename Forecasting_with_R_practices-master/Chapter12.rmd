@@ -1,0 +1,408 @@
+# Chapter 12
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, Load_packages}
+
+library(fpp2)
+
+# I can do parallel computation using %dopar% binary operator in foreach package with parallel backend in doParallel package. I can get result far faster than when I used loop.
+# If I use %do% instead of %dopar%, I can't use parallel computation even if I don't need to designate '.packages' option in foreach function. '.packages' option specifies the required R package to be loaded to use the function that I want to use repeatedly.
+# https://www.r-statistics.com/tag/r-parallel-computation/
+# This R version can't use doSMP package. Therefore I chose to use foreach and doParallel packages.
+library(foreach)
+library(doParallel)
+workers <- makeCluster(4) # My computer has 4 cores
+registerDoParallel(workers)
+
+```
+
+## Forecast combinations examples
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, Forecast_combinations}
+
+# It is an example using auscafe data. They have information about monthly expenditure on eating out in Australia, from April 1982 to September 2017. I'm going to get forecasts from the following models: ETS, ARIMA, STL-ETS, NNAR, and TBATS. And we compare the results using the last 5 years (60 months) of observations.
+auscafe.train <- window(auscafe, end=c(2012,9))
+h <- length(auscafe) - length(auscafe.train)
+
+# forecast using several models.
+auscafe_ETS <- forecast(ets(auscafe.train), h=h)
+auscafe_ARIMA <- forecast(
+  auto.arima(auscafe.train, lambda=0, biasadj=TRUE), h=h
+  )
+auscafe_STL <- stlf(
+  auscafe.train, lambda=0, h=h, biasadj=TRUE
+  )
+auscafe_NNAR <- forecast(nnetar(auscafe.train), h=h)
+auscafe_TBATS <- forecast(
+  tbats(auscafe.train, biasadj=TRUE), h=h
+  )
+auscafe_Combination <- (
+  auscafe_ETS$mean + 
+  auscafe_ARIMA$mean + 
+  auscafe_STL$mean + 
+  auscafe_NNAR$mean + 
+  auscafe_TBATS$mean
+  )/5
+
+# plot the result
+autoplot(auscafe) +
+  autolayer(auscafe_ETS$mean, series="ETS") +
+  autolayer(auscafe_ARIMA$mean, series="ARIMA") +
+  autolayer(auscafe_STL$mean, series="STL") +
+  autolayer(auscafe_NNAR$mean, series="NNAR") +
+  autolayer(auscafe_TBATS$mean, series="TBATS") +
+  autolayer(auscafe_Combination, series="Combination") +
+  xlab("Year") + ylab("$ billion") +
+  ggtitle("Australian monthly expenditure on eating out")
+
+# get accuracy for each model
+c(
+  ETS=accuracy(
+    auscafe_ETS, auscafe
+    )["Test set","RMSE"],
+  ARIMA=accuracy(
+    auscafe_ARIMA, auscafe
+    )["Test set","RMSE"],
+  `STL-ETS`=accuracy(
+    auscafe_STL, auscafe
+    )["Test set","RMSE"],
+  NNAR=accuracy(
+    auscafe_NNAR, auscafe
+    )["Test set","RMSE"],
+  TBATS=accuracy(
+    auscafe_TBATS, auscafe
+    )["Test set","RMSE"],
+  Combination=accuracy(
+    auscafe_Combination, auscafe
+    )["Test set","RMSE"]
+  )
+
+# When I get accuracy using RMSE, the forecasts from combinations of models yielded lowest error. TBATS did particularly well with this series, but the combination approach was even better.
+# Combination approach generally improves forecast accuracy.
+
+```
+
+
+## Dealing with weekly data example
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, Weekly_data}
+
+# The simplest approach is to use an STL decomposition to the seasonal component along with a non-seasonal method applied to the seasonally adjusted component of data.
+gasoline %>% stlf() %>% autoplot()
+
+# An alternative approach is to use a dynamic harmonic regression model. Example using gasoline data again.
+# Use parallel computing to choose the number of Fourier pairs that yields smallest AIC value.
+gasoline_aiccs <- foreach(
+  i = 1:26,
+  .packages = 'fpp2'
+  ) %dopar%
+  auto.arima(
+    gasoline, 
+    xreg=fourier(gasoline, K=i), 
+    seasonal=FALSE
+    )$aic %>%
+  unlist()
+
+gasoline_K.best <- which(
+  gasoline_aiccs == min(gasoline_aiccs)
+)
+
+# Using for-loop to get the number of Fourier pairs.
+#gasoline_dreg.best <- list(aicc=Inf)
+#for(K in seq(26)){
+#  gasoline_dreg <- auto.arima(
+#    #substitute seasonal component with Fourier terms.
+#    gasoline, 
+#    xreg=fourier(gasoline, K=K), 
+#    seasonal=FALSE
+#    )
+#  
+#  if(gasoline_dreg$aicc < gasoline_dreg.best$aicc)
+#  {
+#    gasoline_dreg.best <- gasoline_dreg
+#    gasoline_K.best <- K
+#  }
+#}
+
+# forecast the next 2 years of data. If I assume that 1 year is about 52 weeks, forecast horizon(h) is 104.
+fc_gasoline_dreg.best <- forecast(
+  gasoline_dreg.best, 
+  xreg=fourier(gasoline, K=gasoline_K.best, h=104)
+  )
+
+autoplot(fc_gasoline_dreg.best)
+
+# A third approach is the TBATS model. This was the subject of Question 11.2.
+gasoline_tbats <- tbats(gasoline)
+
+checkresiduals(gasoline_tbats)
+# The residuals aren't like white noise.
+
+fc_gasoline_tbats <- forecast(gasoline_tbats)
+autoplot(fc_gasoline_tbats)
+# The forecasts from above 3 methods are similar to each other.
+# At the question 11.2, I thought that the dynamic harmonic regression model will be best for the data because of unlinearity in trend.
+
+# If there's an unlinearity of trend or irregular seasonality in the data, dynamic regression model with dummy variable(s) will be the only choice. This fact can be applied to daily or sub-daily data, too.
+
+```
+
+
+## Dealing with time series of small counts
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, Ts_of_small_counts}
+
+# The forecast of 3.64 customers can matters even though the forecast of 100.368 customers rarely matters.
+
+# Croston's method.
+# Even if this method does not properly deal with the count nature of the data, but it is used so often, that it is worth knowing about it.
+# qi is the i-th non-zero quantity, and ai is the time between qi-1 and qi. q is often called the "demand" and a the "inter-arrival time".
+#  Let j be the time for the last observed positive observation. Then, the h-step ahead forecast for the demand at time T+h, is given by the ratio q(j+1|j) / a(j+1|j). One-step forecast is calculated by using exponential smoothing with alpha.
+# croston() function's default alpha value is 0.1.
+productC %>% croston() %>% autoplot()
+
+```
+
+## Examples of how to ensure forecasts stay within limits
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, Ensure_forecasts_stay_within_limits}
+
+# To impose a positivity constraint, simply work on the log scale. Simply set the Box-Cox parameter lambda as 0.
+eggs %>%
+  ets(model="AAN", damped=FALSE, lambda=0) %>%
+  forecast(h=50, biasadj=TRUE) %>%
+  autoplot()
+
+# To make forecasts constrained to an interval, transform the data using a scaled logit transform which maps (lower limit, upper limit) to the whole real line:
+# y = log((x-a)/(b-x)), where a and b are lower and upper limits, x is on the original scale, and y is the transformed data.
+# To reverse the transformation, I need to use 
+# x = (b-a)e^y/(1+e^y)+a
+# eggs data example
+# set bounds
+a <- 50
+b <- 400
+
+# Transform data and fit model
+eggs_ets.aan.constrained <- log((eggs-a)/(b-eggs)) %>%
+  ets(model="AAN", damped=FALSE)
+fc_eggs_ets.aan.constrained <- forecast(
+  eggs_ets.aan.constrained, h=50
+  )
+
+# Back-transform forecasts
+fc_eggs_ets.aan.constrained$mean <- 
+  (b-a)*exp(fc_eggs_ets.aan.constrained$mean)/
+  (1+exp(fc_eggs_ets.aan.constrained$mean)) + a
+fc_eggs_ets.aan.constrained$lower <- 
+  (b-a)*exp(fc_eggs_ets.aan.constrained$lower)/
+  (1+exp(fc_eggs_ets.aan.constrained$lower)) + a
+fc_eggs_ets.aan.constrained$upper <- 
+  (b-a)*exp(fc_eggs_ets.aan.constrained$upper)/
+  (1+exp(fc_eggs_ets.aan.constrained$upper)) + a
+fc_eggs_ets.aan.constrained$x <- eggs
+
+# Plot result on original scale
+autoplot(fc_eggs_ets.aan.constrained)
+# As a result of this artificial (and unrealistic) constraint, the forecast distributions have become extremely skewed.
+# No bias-adjustment has been used here, so the forecasts are the medians of the future distributions. 
+# The prediction intervals show 80% and 95% percentile error ranges when the forecasts are constrained.
+
+```
+
+
+## Prediction intervals for aggregates
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, Forecast_aggregate_of_time_periods}
+
+# For example: You may have daily data, fit a model using the data, and want to forecast the total for the next week(need to aggregate 7 days of forecasts).
+# If the point forecasts are means, then adding them up will give a good estimate of the total. 
+
+# A general solution is to use simulations.
+# An example using ETS models applied to Australian monthly gas production data.
+# First fit a model to the data
+gas_ets <- ets(gas/1000)
+
+# Forecast six months ahead
+fc_gas_ets <- forecast(gas_ets, h=6)
+
+# Simulate 10000 future sample paths
+nsim <- 10000
+h <- 6 
+
+# Use parallel computing to get sample paths and the sums of their forecasts.
+sim <- foreach(
+  i = 1:nsim,
+  .packages = 'forecast'
+  ) %dopar%
+  sum(
+    simulate(gas_ets, future = TRUE, nsim = h)
+    ) %>%
+  unlist()
+  
+# Use for-loop to get sample paths and the sums of their forecasts. 
+#sim <- numeric(nsim)
+#for(i in seq_len(nsim)){
+#  # for each sample path, add 6 months' forecasts.
+#  sim[i] <- sum(simulate(gas_ets, future=TRUE, nsim=h))
+#}
+
+# get final aggregated forecast.
+gas_ets.sim.meanagg <- mean(sim)
+
+sum(fc_gas_ets$mean[1:6])
+gas_ets.sim.meanagg
+# The results from above 2 methods are similar to each other.
+
+# get prediction intervals.
+#80% interval:
+quantile(sim, prob=c(0.1, 0.9))
+#95% interval:
+quantile(sim, prob=c(0.025, 0.975))
+
+```
+
+## Backcasting
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, Backcasting}
+
+# Backcast = forecast in reverse time
+# Function to reverse time
+reverse_ts <- function(y)
+{
+  # reverse the data setting the start time same.
+  ts(rev(y), start=tsp(y)[1L], frequency=frequency(y))
+}
+
+# Function to reverse a forecast(object)
+reverse_forecast <- function(object){
+  # already forecasted with reversed time series.
+  # This function reverses the forecast parts to the past of the time series. And also reverses the reversed time series to the original.
+  h <- length(object$mean)
+  f <- frequency(object$mean)
+  object$x <- reverse_ts(object$x)
+  object$mean <- ts(rev(object$mean), 
+                    end=tsp(object$x)[1L]-1/f,
+                    frequency=f)
+  object$lower <- object$lower[h:1L,]
+  object$upper <- object$upper[h:1L,]
+  return(object)
+}
+
+# Backcast example to quarterly retail trade in the Euro area data.
+euretail %>%
+  reverse_ts() %>%
+  auto.arima() %>% 
+  forecast() %>%
+  reverse_forecast() -> bc_euretail
+
+autoplot(bc_euretail) + 
+  ggtitle(paste("Backcasts from", bc_euretail$method))
+
+```
+
+
+## How to decide the number of Fourier pairs for harmonic regression fastly.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, Foreach_with_doParallel}
+
+aiccs <- foreach(i=1:26, .packages = "fpp2") %dopar%     auto.arima(
+  gasoline, 
+  xreg=fourier(gasoline, K=i), 
+  seasonal=FALSE
+  )$aicc
+# 'worker initialization failed' error can appear. I don't why when and why the error occurs. But when I turned off RStudio and reopened, all codes in this chun ran without any problem.
+# If I put models in aiccs, I can access to each model by using 'aiccs[[i]]$blahblah' code.
+
+# measure how much time is needed to get AICc for 26 different Fourier pairs cases.
+system.time(
+  aiccs <- foreach(
+    i=1:26, .packages = "fpp2"
+    ) %dopar% 
+      auto.arima(
+        gasoline, 
+        xreg=fourier(gasoline, K=i), 
+        seasonal=FALSE
+        )$aicc
+  )
+# user: 0.03, system: 0.02, elapsed: 182.05
+# It took about just 3 minutes to run the codes. When I used loop, it took more than 20 minutes.
+# when I used 8 cores, the results were user: 0.08, system: 0.02, elapsed: 138.05. Faster result.
+# explanations about user, system and elapsed:
+# https://stackoverflow.com/questions/5688949/what-are-user-and-system-times-measuring-in-r-system-timeexp-output
+
+# foreach function returns list by default. Need to use unlist function to get minimum AICc value and its index(which equals the number of Fourier pairs).
+aicc.min <- min(unlist(aiccs))
+K_aicc.min <- which(unlist(aiccs) == aicc.min)
+
+# get best fitted model using the minimum AICc generating number of Fourier terms.
+gasoline_dreg.best <- auto.arima(
+  gasoline, 
+  xreg=fourier(gasoline, K=K_aicc.min),
+  seasonal=FALSE
+)
+
+# forecast using the best model.
+fc_gasoline_dreg.best <- forecast(
+  gasoline_dreg.best, 
+  xreg=fourier(gasoline, K=K_aicc.min, h=104)
+  )
+
+autoplot(fc_gasoline_dreg.best)
+
+```
+
+## Forecasting on training and test sets
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, Forecasting_on_train_and_test_sets}
+
+# Typically, we compute one-step forecasts on the training data (the "fitted values") and multi-step forecasts on the test data.
+
+# Multi-step forecasting on training data
+# use fitted function's h argument. It allow for h-step "fitted values" on the training set.
+# An example using auscafe data.
+auscafe.train <- subset(
+  auscafe, end=length(auscafe)-61
+  )
+auscafe.test <- subset(
+  auscafe, start=length(auscafe)-60
+  )
+
+auscafe_arima.2.1.1.0.1.2.12 <- Arima(
+  auscafe.train, 
+  order=c(2,1,1), seasonal=c(0,1,2), 
+  lambda=0
+  )
+
+# typical one-step forecasts on training set('fitted values') and multi-step forecasts on test set.
+fc_auscafe_arima.2.1.1.0.1.2.12 <- forecast(
+  auscafe_arima.2.1.1.0.1.2.12, h = 60
+)
+
+auscafe.train %>% 
+  forecast(h=60) %>% 
+  autoplot() + 
+    autolayer(auscafe.test) +
+    autolayer(auscafe_arima.2.1.1.0.1.2.12$fitted)
+
+# 12-step forecasts on training data.
+autoplot(auscafe.train, series="Training data") +
+  autolayer(
+    fitted(auscafe_arima.2.1.1.0.1.2.12, h=12),
+    series="12-step fitted values"
+    )
+
+# One-step forecasting on test data
+# In the above example, the forecast errors will be for 1-step, 2-steps, ., 60-steps ahead. 
+# The forecast variance usually increases with the forecast horizon.
+# So if I simply average the absolute or squared errors from the test set, I'm combining results with different variances.
+
+# To solve this issue, obtain 1-step errors on the test data. 
+# This can be easily done by using model argument in model-making functions.
+# Just use training data to estimate parameters, and then apply the estimated model to test data. 
+# The fitted values are one-step forecasting on test set even if they are looked like training set's fitted values.
+auscafe.test_arima.2.1.1.0.1.2.12 <- Arima(
+  auscafe.test, model=auscafe_arima.2.1.1.0.1.2.12
+  )
+accuracy(auscafe.test_arima.2.1.1.0.1.2.12)
+
+```
+
