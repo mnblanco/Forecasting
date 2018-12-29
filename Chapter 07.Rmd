@@ -1,0 +1,576 @@
+---
+title: "Untitled"
+author: "Marjorie Blanco"
+date: "12/27/2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(fpp2)
+options(width=60)
+```
+
+# Excersise
+
+## Excersise
+
+Consider the pigs series — the number of pigs slaughtered in Victoria each month.
+
+Use the ses() function in R to find the optimal values of [Math Processing Error] and [Math Processing Error], and generate forecasts for the next four months.
+
+```{r}
+autoplot(pigs) +
+  ggtitle("Number of pigs slaughtered in Victoria, Australia",
+          subtitle = "Jan 1980 – Aug 1995") +
+  ylab("Number of pigs slaughtered") + xlab("Year")
+
+ses_pigs <- ses(pigs, h=5)
+
+ses_pigs$model
+
+autoplot(ses_pigs) +
+  autolayer(fitted(ses_pigs), series="Fitted") + 
+  ylab("Number of pigs slaughtered") + xlab("Year")
+```
+
+```{r echo=FALSE, cache=TRUE}
+```
+
+
+Compute a 95% prediction interval for the first forecast using [Math Processing Error] where [Math Processing Error] is the standard deviation of the residuals. Compare your interval with the interval produced by R.
+
+```{r}
+# 95% prediction interval for the first forecast
+ses_pigs$upper[1, "95%"]
+ses_pigs$lower[1, "95%"]
+
+# calculate 95% prediction interval using formula
+s <- sd(ses_pigs$residuals)
+ses_pigs$mean[1] + 1.96*s
+ses_pigs$mean[1] - 1.96*s
+
+ses_pigs
+```
+
+## Excersise
+
+Write your own function to implement simple exponential smoothing. The function should take arguments y (the time series), alpha (the smoothing parameter [Math Processing Error]) and level (the initial level [Math Processing Error]). It should return the forecast of the next observation in the series. Does it give the same forecast as ses()?
+
+```{r}
+# make SES function
+SES <- function(y, alpha, l0){
+  y_hat <- l0
+  for(index in 1:length(y)){
+    y_hat <- alpha*y[index] + (1 - alpha)*y_hat 
+  }
+  cat("Forecast of next observation by SES function: ",
+      as.character(y_hat),
+      sep = "\n")
+}
+
+# compare ses and SES using pigs data
+alpha <- ses_pigs$par[1]
+l0 <- ses_pigs$model$par[2]
+
+SES(pigs, alpha = alpha, l0 = l0)
+
+writeLines(paste("Forecast of next observation by ses function: ", as.character(ses_pigs$mean[1])
+))
+
+# compare ses and SES using ausbeer data
+ses_ausbeer <- ses(ausbeer, h = 1)
+alpha <- ses_ausbeer$model$par[1]
+l0 <- ses_ausbeer$model$par[2]
+
+SES(ausbeer, alpha = alpha, l0 = l0)
+
+writeLines(paste("Forecast of next observation by ses function: ",       as.character(ses_ausbeer$mean[1])))
+
+# found that SES function worked just like ses function.
+```
+
+## Excersise
+
+Modify your function from the previous exercise to return the sum of squared errors rather than the forecast of the next observation. Then use the optim() function to find the optimal values of [Math Processing Error] and [Math Processing Error]. Do you get the same values as the ses() function?
+
+Combine your previous two functions to produce a function which both finds the optimal values of [Math Processing Error] and [Math Processing Error], and produces a forecast of the next observation in the series.
+
+## Excersise
+
+Data set books contains the daily sales of paperback and hardcover books at the same store. The task is to forecast the next four days’ sales for paperback and hardcover books.
+
+Plot the series and discuss the main features of the data.
+
+```{r}
+autoplot(books) +
+  ggtitle("Daily sales of paperback and hardcover books") +
+  ylab("Daily sales amount") + xlab("Year")
+```
+
+The sales of paperback and hardcover books increased as time went on with lots of fluctuations. The fluctuations do not show a particular frequency (i.e. cycle).
+
+Use the ses() function to forecast each series, and plot the forecasts.
+
+```{r}
+ses_paperback <- ses(books[, "Paperback"], h = 4)
+ses_hardcover <- ses(books[, "Hardcover"], h = 4)
+
+checkresiduals(ses_paperback)
+checkresiduals(ses_hardcover)
+
+autoplot(books[, "Paperback"], series = "Paperback") +
+  autolayer(ses_paperback, series = "Paperback") +
+  autolayer(books[, "Hardcover"], series = "Hardcover") +
+  autolayer(ses_hardcover, series = "Hardcover", PI = FALSE) +
+  ylab("Daily sales amount") +
+  ggtitle("Daily Dales of paperback and hardcover books", subtitle = "ses function")
+```
+
+Compute the RMSE values for the training data in each case.
+
+```{r}
+writeLines(paste("RMSE paperback: ",  as.character(sqrt(mean(ses_paperback$residuals^2)))))
+writeLines(paste("RMSE hardcover: ",  as.character(sqrt(mean(ses_hardcover$residuals^2)))))
+```
+
+The RMSE values for the training data show that the variance of the residuals of hardcover sales is smaller than the paperback sales.
+
+Now apply Holt’s linear method to the paperback and hardback series and compute four-day forecasts in each case.
+
+```{r}
+# because ts is daily, h = 4
+holt_paperback <- holt(books[, "Paperback"], h = 4)
+holt_hardcover <- holt(books[, "Hardcover"], h = 4)
+
+checkresiduals(holt_paperback)
+checkresiduals(holt_hardcover)
+
+autoplot(books[, "Paperback"], series = "Paperback") +
+  autolayer(holt_paperback, series = "Paperback") +
+  autolayer(books[, "Hardcover"], series = "Hardcover") +
+  autolayer(holt_hardcover, series = "Hardcover", PI = FALSE) +
+  ylab("Daily sales amount") +
+  ggtitle("Daily Dales of paperback and hardcover books", subtitle = "Holt’s linear method")
+```
+
+There is a linear trend in the forecasts for hardcover and paperback.
+
+Compare the RMSE measures of Holt’s method for the two series to those of simple exponential smoothing in the previous question. (Remember that Holt’s method is using one more parameter than SES.) Discuss the merits of the two forecasting methods for these data sets.
+
+```{r}
+writeLines(paste("RMSE paperback: ",  as.character(sqrt(mean(holt_paperback$residuals^2)))))
+writeLines(paste("RMSE hardcover: ",  as.character(sqrt(mean(holt_hardcover$residuals^2)))))
+```
+
+The RMSE values became lower for both paperback and hardcover when Holt's method was used.
+# If there is linearly approximable trend in data, it would be better to use Holt's linear method even if one more parameter is needed than SES. But if there isn't any particular trend in data, it would be better to use SES method to make the model simpler.
+
+Compare the forecasts for the two series using both methods. Which do you think is best?
+
+The forecasts for hardcover sales is better for paperback sales. RMSE is lower for hardcover sales and the forecasts of paperback sales does not reflect the pattern in the data using Holt's method.
+
+Calculate a 95% prediction interval for the first forecast for each series, using the RMSE values and assuming normal errors. Compare your intervals with those produced using ses and holt.
+
+```{r}
+# writeLines("95% PI of paperback sales calculated by Holt's function")
+# holt_paperback$upper[1, "95%"]
+# holt_paperback$lower[1, "95%"]
+# 
+# writeLines("95% PI of paperback sales calculated by ses function")
+# holt_paperback$mean[1] + 1.96*s_paperback
+# holt_paperback$mean[1] - 1.96*s_paperback
+# 
+# writeLines("95% PI of hardcover sales calculated by Holt's function")
+# holt_hardcover$upper[1, "95%"]
+# holt_hardcover$lower[1, "95%"]
+# 
+# writeLines("95% PI of hardcover sales calculated by formula")
+# holt_hardcover$mean[1] + 1.96*s_hardcover
+# holt_hardcover$mean[1] - 1.96*s_hardcover
+```
+
+
+For this exercise use data set eggs, the price of a dozen eggs in the United States from 1900–1993. Experiment with the various options in the holt() function to see how much the forecasts change with damped trend, or with a Box-Cox transformation. Try to develop an intuition of what each argument is doing to the forecasts.
+
+[Hint: use h=100 when calling holt() so you can clearly see the differences between the various options when plotting the forecasts.]
+
+```{r}
+autoplot(eggs) +
+  ggtitle("Price of dozen eggs in US, 1900–1993") +
+  ylab("US Dollar") + xlab("Year")
+```
+
+There is a downward trend of the price of dozen eggs in US.
+# I expect that using holt function with damped = TRUE and Box-Cox options will yield best forecasts. Because I think that the price of eggs will decrease more slowly as the price is going to near 0. And there's a need to make the size of the seasonal variation smaller for bigger prices.
+
+```{r}
+# holt function without using any options
+holt_eggs <- holt(eggs, h = 100)
+holt_eggs$model
+autoplot(holt_eggs) +
+  autolayer(holt_eggs$fitted, series = "Holt no option") +
+  theme(legend.position="bottom")  
+```
+
+This prediction is unrealistic because the predicted price falls below 0.
+
+```{r}
+# holt function with damped option
+holt_damped_eggs <- holt(eggs, damped = TRUE, h = 100)
+holt_damped_eggs$model
+autoplot(holt_damped_eggs) +
+  autolayer(holt_damped_eggs$fitted, series = "Holt damped option") +
+  theme(legend.position="bottom")
+```
+
+The predicted price don't go below 0, but point forecasts does not reflect the existing trend.
+
+```{r}
+# holt function with Box-Cox transformation
+holt_boxcox_eggs <- holt(eggs, lambda = BoxCox.lambda(eggs), h = 100)
+holt_boxcox_eggs$model
+autoplot(holt_boxcox_eggs) +
+  autolayer(holt_boxcox_eggs$fitted, series = "Holt with Box-Cox transformation")  +
+  theme(legend.position="bottom")
+```
+The point forecasts does not fall below 0 and reflects the existing trend.
+
+```{r}
+# holt function with Box-Cox transformation and damped option
+holt_boxcox_damped_eggs <- holt(eggs, damped = TRUE,
+                                lambda = BoxCox.lambda(eggs), h = 100)
+holt_boxcox_damped_eggs$model
+autoplot(holt_boxcox_damped_eggs) +
+  autolayer(holt_boxcox_damped_eggs$fitted, series = "Holt damped with Box-Cox transformation") +
+  theme(legend.position="bottom")
+```
+
+The point forecasts does not fall below 0 and is decreasing, but it does no reflect the existing trend well. Lower ends of prediction intervals were below 0.
+
+```{r}
+# holt function without using any options
+checkresiduals(holt_eggs)
+# holt function with damped option
+checkresiduals(holt_damped_eggs)
+# holt function with Box-Cox transformation
+checkresiduals(holt_boxcox_eggs)
+# holt function with Box-Cox transformation and damped option
+checkresiduals(holt_boxcox_damped_eggs)
+```
+
+```{r}
+# show RMSE values for each model
+writeLines(paste("RMSE when using holt function without using any options:", as.character(sqrt(mean(holt_eggs$residuals^2)))))
+
+writeLines(paste("RMSE when using holt function with damped option:", as.character(sqrt(mean(holt_damped_eggs$residuals^2)))))
+
+writeLines(paste("RMSE when using holt function with Box-Cox transformation:",
+                 as.character(sqrt(mean(holt_boxcox_eggs$residuals^2)))))
+
+writeLines(paste("RMSE when using holt function with damped option and Box-Cox transformation:", 
+                 as.character(sqrt(mean(holt_boxcox_damped_eggs$residuals^2)))))
+```
+
+Which model gives the best RMSE?
+
+# BoxCox transformation captures trend and reflects it to the forecasts. Therefore it improves accuracy of the model. Holt's method with damped option just prohibits the forecasts to be below 0, not much improving accuracy .
+
+# The best model was the Box-Cox transformation with Holt's linear method. It gave plausible point forecasts and prediction intervals. For 100 years' prediction, Box-Cox transformation did enough damping effect. With damping option together, the point forecast couldn't follow the existing trend.
+
+## Excersise
+
+Recall your retail time series data (from Exercise 3 in Section 2.10).
+
+Why is multiplicative seasonality necessary for this series?
+
+```{r}
+```
+
+The data show that the seasonality indices increased when the retail sales increased. Multiplicative seasonality can reflect the situation in the model, while additive seasonality can't.
+
+Apply Holt-Winters’ multiplicative method to the data. Experiment with making the trend damped.
+
+```{r}
+
+```
+
+Compare the RMSE of the one-step forecasts from the two methods. Which do you prefer?
+
+```{r}
+
+```
+
+Check that the residuals from the best method look like white noise.
+
+```{r}
+
+```
+
+Now find the test set RMSE, while training the model to the end of 2010. Can you beat the seasonal naïve approach from Exercise 8 in Section 3.7?
+For the same retail data, try an STL decomposition applied to the Box-Cox transformed series, followed by ETS on the seasonally adjusted data. How does that compare with your best previous forecasts on the test set?
+```{r}
+
+```
+
+For this exercise use data set ukcars, the quarterly UK passenger vehicle production data from 1977Q1–2005Q1.
+Plot the data and describe the main features of the series.
+
+```{r}
+autoplot(ukcars) +
+  ggtitle("Quarterly UK passenger car production") +
+  ylab("Production (thousands)") + xlab("Year")
+```
+
+Decompose the series using STL and obtain the seasonally adjusted data.
+
+```{r}
+stl_ukcars <- stl(ukcars, s.window = 4, robust = TRUE)
+# STL decomposed component
+autoplot(stl_ukcars) +
+  ggtitle("Quarterly UK passenger car production",
+          subtitle = "STL decomposition")
+```
+
+The variations in seasonally adjusted data are smaller.
+
+Forecast the next two years of the series using an additive damped trend method applied to the seasonally adjusted data. (This can be done in one step using stlf() with arguments etsmodel="AAN", damped=TRUE.)
+
+```{r}
+# ukcars is quarterly so two years is h = 8
+stlf_ets_AAdN_ukcars <-  stlf(ukcars, h = 8, etsmodel = "AAN", damped = TRUE)
+stlf_ets_AAdN_ukcars$model
+autoplot(stlf_ets_AAdN_ukcars) +
+  ggtitle("Quarterly UK passenger car production", subtitle = "STL + ETS(A,Ad,N)") +
+  ylab("Production (thousands)") + xlab("Year")
+```
+
+Forecast the next two years of the series using Holt’s linear method applied to the seasonally adjusted data (as before but with damped=FALSE).
+
+```{r}
+stlf_ets_AAN_ukcars <- stlf(ukcars, h = 8, etsmodel = "AAN", damped = FALSE)
+stlf_ets_AAN_ukcars$model
+autoplot(stlf_ets_AAN_ukcars) +
+  ggtitle("Quarterly UK passenger car production", subtitle = "STL + ETS(A,A,N)") +
+  ylab("Production (thousands)") + xlab("Year")
+```
+
+Now use ets() to choose a seasonal model for the data.
+
+```{r}
+ets_ukcars <- ets(ukcars)
+autoplot(ets_ukcars)
+summary(ets_ukcars)
+```
+ETS(A, N, A) seasonal model.
+
+```{r}
+autoplot(forecast(ets_ukcars, h = 8)) +
+    ylab("Production (thousands)") + xlab("Year")
+```
+
+Compare the RMSE of the ETS model with the RMSE of the models you obtained using STL decompositions. Which gives the better in-sample fits?
+
+```{r}
+print("Accuracy of STL + ETS(A, Ad, N) model:")
+accuracy(stlf_ets_AAdN_ukcars)
+print("Accuracy of STL + ETS(A, A, N) model:")
+accuracy(stlf_ets_AAN_ukcars)
+print("Accuracy of ETS(A, N, A) model:")
+accuracy(ets_ukcars)
+```
+STL + ETS(A, Ad, N) is the best model.
+
+Compare the forecasts from the three approaches? Which seems most reasonable?
+
+The forecasts from the STL + ETS(A, Ad, N) model was the most reasonable. The forecasts best reflected the not-increasing and smaller-variation trend after the fall of 2001.
+
+Check the residuals of your preferred model.
+
+```{r}
+checkresiduals(stlf_ets_AAdN_ukcars)
+checkresiduals(stlf_ets_AAN_ukcars)
+checkresiduals(ets_ukcars)
+```
+
+For this exercise use data set visitors, the monthly Australian short-term overseas visitors data, May 1985–April 2005.
+
+Make a time plot of your data and describe the main features of the series.
+
+```{r}
+autoplot(visitors) +
+  ggtitle("Monthly Australian overseas vistors") +
+  ylab("Number of vistors") + xlab("Year")
+```
+
+Split your data into a training set and a test set comprising the last two years of available data. Forecast the test set using Holt-Winters’ multiplicative method.
+
+```{r}
+visitors_train <- subset(visitors, end = length(visitors) - 24)
+visitors_test <- subset(visitors, start = length(visitors) - 23)
+fc_hw_mul_visitors <- hw(visitors_train,
+                            h = 24,
+                            seasonal = "multiplicative")
+
+fc_hw_add_visitors <- hw(visitors_train,
+                            h = 24,
+                            seasonal = "additive")
+
+fc_hw_mul_visitors$model
+fc_hw_add_visitors$model
+```
+
+Why is multiplicative seasonality necessary here?
+
+```{r}
+autoplot(fc_hw_mul_visitors) +
+  ylab("Number of vistors") + xlab("Year")
+autoplot(fc_hw_add_visitors) +
+  ylab("Number of vistors") + xlab("Year")
+```
+
+```{r}
+checkresiduals(fc_hw_mul_visitors)
+checkresiduals(fc_hw_add_visitors)
+```
+
+Thee seasonality effect increased as the number of visitors increased. Additive seasonality does not reflect the situation to the model and to the forecast.
+
+Forecast the two-year test set using each of the following methods:
+an ETS model;
+
+```{r}
+fc_ets_visitors <- forecast(ets(visitors_train), h = 24)
+autoplot(fc_ets_visitors) +
+  ylab("Number of vistors") + xlab("Year")
+```
+
+
+an additive ETS model applied to a Box-Cox transformed series;
+
+```{r}
+fc_ets_add_boxcox_visitors <- forecast(
+  ets(visitors_train, 
+      lambda = BoxCox.lambda(visitors_train),
+      additive.only = TRUE),
+  h = 24
+)
+autoplot(fc_ets_add_boxcox_visitors) +
+  ylab("Number of vistors") + xlab("Year")
+```
+
+a seasonal naïve method;
+
+```{r}
+fc_snaive_visitors <- snaive(visitors_train, h = 24)
+autoplot(fc_snaive_visitors_train) +
+  ylab("Number of vistors") + xlab("Year")
+```
+
+an STL decomposition applied to the Box-Cox transformed data followed by an ETS model applied to the seasonally adjusted (transformed) data.
+
+```{r}
+fc_boxcox_stl_ets_visitors <- visitors_train %>%
+  stlm(
+    lambda = BoxCox.lambda(visitors_train),
+    s.window = 13,
+    robust = TRUE,
+    method = "ets"
+  ) %>%
+  forecast(h = 24)
+autoplot(fc_boxcox_stl_ets_visitors) +
+  ylab("Number of vistors") + xlab("Year")
+```
+
+Which method gives the best forecasts? Does it pass the residual tests?
+
+```{r}
+accuracy(fc_hw_mul_visitors, visitors_test) #Holt-Winters’ multiplicative model
+accuracy(fc_hw_add_visitors, visitors_test) #Holt-Winters’ additive model
+accuracy(fc_ets_visitors, visitors_test) #ETS model
+accuracy(fc_ets_add_boxcox_visitors, visitors_test) #additive ETS model applied to a Box-Cox transformed model
+accuracy(fc_snaive_visitors, visitors_test) #seasonal naïve model
+accuracy(fc_boxcox_stl_ets_visitors, visitors_test) #ETS model applied to the seasonally adjusted model
+```
+
+Compare the same four methods using time series cross-validation with the tsCV() function instead of using a training and test set. Do you come to the same conclusions?
+
+```{r}
+fets_add_boxcox <- function(y, h) {
+  forecast(ets(
+    y,
+    lambda = BoxCox.lambda(y),
+    additive.only = TRUE
+  ),
+  h = h)
+}
+fstlm <- function(y, h) {
+  forecast(stlm(
+    y, 
+    lambda = BoxCox.lambda(y),
+    s.window = frequency(y) + 1,
+    robust = TRUE,
+    method = "ets"
+  ),
+  h = h)
+}
+fets <- function(y, h) {
+  forecast(ets(y),
+           h = h)
+}
+
+#  models comparison: RMSE
+
+# Holt-Winters’ multiplicative method
+writeLines("Holt-Winters’ multiplicative RMSE:")
+sqrt(mean(tsCV(visitors, hw, h = 1, seasonal = "multiplicative")^2, na.rm = TRUE))
+# Holt-Winters’ additive method
+writeLines("Holt-Winters’ additive RMSE:")
+sqrt(mean(tsCV(visitors, hw, h = 1, seasonal = "additive")^2, na.rm = TRUE))
+# ETS model
+writeLines("ETS (M,Ad,M) RMSE:")
+sqrt(mean(tsCV(visitors, fets, h = 1)^2, na.rm = TRUE))
+# additive ETS model applied to a Box-Cox transformed 
+writeLines("Additive ETS (M,Ad,A) model applied to a Box-Cox transformed RMSE:")
+sqrt(mean(tsCV(visitors, fets_add_boxcox, h = 1)^2, na.rm = TRUE))
+# seasonal naïve
+writeLines("Seasonal naïve RMSE:")
+sqrt(mean(tsCV(visitors, snaive, h = 1)^2, na.rm = TRUE))
+# ETS model applied to the seasonally adjusted 
+writeLines("STL + ETS (M,Ad,N) model applied to the seasonally adjusted RMSE:")
+sqrt(mean(tsCV(visitors, fstlm, h = 1)^2, na.rm = TRUE))
+```
+
+# tsCV errors show that 
+Based on RMSE, the best model is the STL + ETS(M, Ad, N) model and the worst model is seasonal naive model.
+
+The fets() function below returns ETS forecasts.
+
+fets <- function(y, h) {
+forecast(ets(y), h = h)
+}
+Apply tsCV() for a forecast horizon of [Math Processing Error], for both ETS and seasonal naïve methods to the qcement data, (Hint: use the newly created fets() and the existing snaive() functions as your forecast function arguments.)
+
+```{r}
+autoplot(qcement)
+mean(tsCV(qcement, fets, h = 4)^2, na.rm = TRUE)
+mean(tsCV(qcement, snaive, h = 4)^2, na.rm = TRUE)
+```
+
+Compute the MSE of the resulting [Math Processing Error]-step-ahead errors. (Hint: make sure you remove missing values.) Why are there missing values? Comment on which forecasts are more accurate. Is this what you expected?
+
+Compare ets(), snaive() and stlf() on the following six time series. For stlf(), you might need to use a Box-Cox transformation. Use a test set of three years to decide what gives the best forecasts. ausbeer, bricksq, dole, a10, h02, usmelec.
+
+Use ets() on the following series:
+
+bicoal, chicken, dole, usdeaths, lynx, ibmclose, eggs.
+
+Does it always give good forecasts?
+
+Find an example where it does not work well. Can you figure out why?
+
+Show that the point forecasts from an ETS(M,A,M) model are the same as those obtained using Holt-Winters’ multiplicative method.
+
+Show that the forecast variance for an ETS(A,N,N) model is given by [Math Processing Error]
+
+Write down 95% prediction intervals for an ETS(A,N,N) model as a function of [Math Processing Error], [Math Processing Error], [Math Processing Error] and [Math Processing Error], assuming Gaussian errors.
